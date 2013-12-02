@@ -30,7 +30,6 @@ class Session
     
     public function __construct(SessionStorage $storage = null, $name = 'opis')
     {
-
         if($storage == null)
         {
             $storage = new Native();
