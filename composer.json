@@ -1,9 +1,33 @@
 {
     "name": "opis/session",
+    "description": "Opis Session",
+    "keywords": ["opis", "session"],
+    "homepage": "http://opis.io",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Marius Sarca",
+            "email": "marius.sarca@gmail.com"
+        }
+    ],
     "require": {
         "php": ">=5.3.0"
     },
+    "suggest": {
+        "opis/database": "Required by the Database session storage.",
+        "predis/predis": "Required by the Redis session storage."
+    },
     "autoload": {
         "psr-0": {"Opis\\Session": ""}
+    },
+    "target-dir": "Opis/Session",
+    "config": {
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
     }
 }
