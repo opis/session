@@ -22,10 +22,15 @@ namespace Opis\Session;
 
 interface SessionHandlerInterface
 {
-    public function sessionOpen($savePath, $sessionName);
-    public function sessionClose();
-    public function sessionRead($key);
-    public function sessionWrite($key, $data);
-    public function sessionDestroy($id);
-    public function sessionGarbageCollector($maxLifetime);
+    function close();
+    
+    function destroy($id);
+    
+    function gc($maxlifetime);
+    
+    function open($path, $name);
+    
+    function read($id);
+    
+    function write($id, $data);
 }

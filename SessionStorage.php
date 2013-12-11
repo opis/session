@@ -171,7 +171,7 @@ abstract class SessionStorage
      * @return boolean
      */
     
-    public function destroy()
+    public function dispose()
     {
         return session_destroy();
     }

@@ -53,7 +53,7 @@ class File extends SessionStorage implements SessionHandlerInterface
         // Fixes issue with Debian and Ubuntu session garbage collection
         if(mt_rand(1, 100) === 100)
         {
-            $this->sessionGarbageCollector(ini_get('session.gc_maxlifetime'));
+            $this->gc(ini_get('session.gc_maxlifetime'));
         }
     }
 
@@ -66,7 +66,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionOpen($savePath, $sessionName)
+    public function open($savePath, $sessionName)
     {
         return true;
     }
@@ -78,7 +78,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionClose()
+    public function close()
     {
         return true;
     }
@@ -91,7 +91,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * @return  string
      */
 
-    public function sessionRead($id)
+    public function read($id)
     {
         $data = '';
         if(file_exists($this->path . '/' . $id) && is_readable($this->path . '/' . $id))
@@ -109,7 +109,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * @param   string  $data  Session data
      */
 
-    public function sessionWrite($id, $data)
+    public function write($id, $data)
     {
         if(is_writable($this->path))
         {
@@ -126,7 +126,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionDestroy($id)
+    public function destroy($id)
     {
         if(file_exists($this->path . '/' . $id) && is_writable($this->path . '/' . $id))
         {
@@ -143,7 +143,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionGarbageCollector($maxLifetime)
+    public function gc($maxLifetime)
     {
         $files = glob($this->path . '/*');
         if(is_array($files))

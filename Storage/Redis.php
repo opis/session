@@ -26,6 +26,8 @@ use Predis\Client;
 
 class Redis extends SessionStorage implements SessionHandlerInterface
 {
+ 
+    protected $prefix;
     
     protected $maxLifetime;
     
@@ -38,9 +40,10 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * 
      */
     
-    public function __construct(Client $redis, $maxLifetime = 0)
+    public function __construct(Client $redis, $prefix = 'session_', $maxLifetime = 0)
     {
         $this->redis = $redis;
+        $this->prefix = $prefix;
         $this->maxLifetime = $maxLifetime > 0 ? $maxLifetime : ini_get('session.gc_maxlifetime');
     }
     
@@ -69,7 +72,7 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionOpen($savePath, $sessionName)
+    public function open($savePath, $sessionName)
     {
         return true;
     }
@@ -81,7 +84,7 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionClose()
+    public function close()
     {
         return true;
     }
@@ -94,9 +97,9 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * @return  string
      */
 
-    public function sessionRead($id)
+    public function read($id)
     {
-        return (string) $this->redis->get('sess_' . $id);
+        return (string) $this->redis->get($this->prefix . $id);
     }
 
     /**
@@ -107,11 +110,11 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * @param   string  $data  Session data
      */
 
-    public function sessionWrite($id, $data)
+    public function write($id, $data)
     {
-        $this->redis->set('sess_' . $id, $data);
+        $this->redis->set($this->prefix . $id, $data);
         
-        $this->redis->expire('sess_' . $id, $this->maxLifetime);
+        $this->redis->expire($this->prefix . $id, $this->maxLifetime);
         
         return true;
     }
@@ -124,9 +127,9 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionDestroy($id)
+    public function destroy($id)
     {
-        return (bool) $this->redis->delete('sess_' . $id);
+        return (bool) $this->redis->delete($this->prefix . $id);
     }
 
     /**
@@ -137,7 +140,7 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionGarbageCollector($maxLifetime)
+    public function gc($maxLifetime)
     {
         return true;
     }

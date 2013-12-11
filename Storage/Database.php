@@ -61,7 +61,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
         
         if(mt_rand(1, 100) === 100)
         {
-            $this->sessionGarbageCollector(0);
+            $this->gc(0);
         }
     }
 
@@ -75,7 +75,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionOpen($savePath, $sessionName)
+    public function open($savePath, $sessionName)
     {
         return true;
     }
@@ -87,7 +87,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionClose()
+    public function close()
     {
         return true;
     }
@@ -100,7 +100,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * @return  string
      */
 
-    public function sessionRead($id)
+    public function read($id)
     {
         try
         {
@@ -126,7 +126,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * @param   string  $data  Session data
      */
 
-    public function sessionWrite($id, $data)
+    public function write($id, $data)
     {
         try
         {
@@ -163,7 +163,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionDestroy($id)
+    public function destroy($id)
     {
         try
         {
@@ -183,7 +183,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * @return  boolean
      */
 
-    public function sessionGarbageCollector($maxLifetime)
+    public function gc($maxLifetime)
     {
         try
         {

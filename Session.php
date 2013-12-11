@@ -41,12 +41,12 @@ class Session
         {
             session_set_save_handler
             (
-                array($storage, 'sessionOpen'),
-                array($storage, 'sessionClose'),
-                array($storage, 'sessionRead'),
-                array($storage, 'sessionWrite'),
-                array($storage, 'sessionDestroy'),
-                array($storage, 'sessionGarbageCollector')
+                array($storage, 'open'),
+                array($storage, 'close'),
+                array($storage, 'read'),
+                array($storage, 'write'),
+                array($storage, 'destroy'),
+                array($storage, 'gc')
             );
         }
         session_name($name);
