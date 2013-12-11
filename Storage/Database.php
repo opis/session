@@ -104,12 +104,8 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            $result = $this->database
-                            ->select($this->table)
-                            ->columns(array('data'))
-                            ->where('id', $id)
-                            ->execute('data');
-                            
+            $result = $this->database->from($this->table)->where('id', $id)->column('data');
+            
             return $result === false ? '' : $result;
         }
         catch(PDOException $e)
@@ -130,23 +126,22 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            $result = $this->database
-                            ->select($this->table)
-                            ->count()
-                            ->where('id', $id)
-                            ->execute(0);
+            $result = $this->database->from($this->table)->where('id', $id)->count();
+            
             if($result != 0)
             {
-                return (bool) $this->database->update($this->table)
-                                    ->columns(array('data' => $data, 'expires' => time() + $this->maxLifetime))
+                return (bool) $this->database
+                                    ->update($this->table)
                                     ->where('id', $id)
+                                    ->set(array('data' => $data, 'expires' => time() + $this->maxLifetime))
                                     ->execute();
             }
             else
             {
-                return $this->database->insert($this->table, array('id', 'data', 'expires'))
-                                    ->values(array($id, $data, time() + $this->maxLifetime))
-                                    ->execute();
+                return $this->database
+                            ->insert($this->table, array('id', 'data', 'expires'))
+                            ->values(array($id, $data, time() + $this->maxLifetime))
+                            ->execute();
             }
         }
         catch(PDOException $e)
@@ -167,7 +162,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            return (bool) $this->database->delete($this->table)->where('id', $id)->execute();
+            return (bool) $this->database->from($this->table)->where('id', $id)->delete();
         }
         catch(PDOException $e)
         {
@@ -187,7 +182,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            return (bool) $this->database->delete($this->table)->where('expires', time(), '<')->execute();
+            return (bool) $this->database->from($this->table)->where('expires', time(), '<')->delete();
         }
         catch(PDOException $e)
         {
