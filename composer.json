@@ -11,11 +11,9 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
-    },
-    "suggest": {
-        "opis/database": "Required by the Database session storage.",
-        "predis/predis": "Required by the Redis session storage."
+        "php": ">=5.3.0",
+        "opis/database": "1.3.*",
+        "predis/predis": "0.8.*"
     },
     "autoload": {
         "psr-0": {"Opis\\Session": ""}
@@ -27,7 +25,7 @@
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.1-dev"
         }
     }
 }
