@@ -20,7 +20,7 @@
 
 namespace Opis\Session;
 
-abstract class SessionStorage
+abstract class SessionStorage implements SessionInterface
 {
     /** @var array Flash. */
     protected $flashdata = array();

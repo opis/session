@@ -23,7 +23,7 @@ namespace Opis\Session;
 use RuntimeException;
 use Opis\Session\Storage\Native;
 
-class Session
+class Session implements SessionInterface
 {
     
     protected $storage;
@@ -53,9 +53,55 @@ class Session
         session_start();
     }
     
-    public function __call($name, $arguments)
+    
+    public function remember($key, $value)
     {
-        return call_user_func_array(array($this->storage, $name), $arguments);
+        $this->storage->remember($key, $value);
+    }
+    
+    public function forget($key)
+    {
+        $this->storage->forget($key);
+    }
+    
+    public function has($key)
+    {
+        return $this->storage->has($key);
+    }
+    
+    public function get($key, $default = null)
+    {
+        return $this->storage->get($key, $default);
+    }
+    
+    public function flash($key, $data = null)
+    {
+        $this->storage->flash($key, $data);
+    }
+    
+    public function reflash(array $keys = array())
+    {
+        $this->storage->reflash($keys);
+    }
+    
+    public function clear()
+    {
+        $this->storage->clear();
+    }
+    
+    public function id()
+    {
+        return $this->storage->id();
+    }
+    
+    public function regenerate($deleteOld = true)
+    {
+        return $this->storage->regenerate($deleteOld);
+    }
+    
+    public function dispose()
+    {
+        $this->storage->dispose();
     }
     
 }
