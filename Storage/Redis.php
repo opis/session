@@ -20,9 +20,9 @@
 
 namespace Opis\Session\Storage;
 
-use Opis\Session\SessionStorage;
-use Opis\Session\SessionHandlerInterface;
+use SessionHandlerInterface;
 use Predis\Client;
+use Opis\Session\SessionStorage;
 
 class Redis extends SessionStorage implements SessionHandlerInterface
 {

@@ -20,8 +20,8 @@
 
 namespace Opis\Session\Storage;
 
+use SessionHandlerInterface;
 use Opis\Session\SessionStorage;
-use Opis\Session\SessionHandlerInterface;
 
 class File extends SessionStorage implements SessionHandlerInterface
 {

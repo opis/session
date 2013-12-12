@@ -20,8 +20,7 @@
 
 namespace Opis\Session\Storage;
 
-use Opis\Session\SessionHandlerInterface;
-
+use SessionHandlerInterface;
 use MongoCollection;
 
 class Mongo implements SessionHandlerInterface

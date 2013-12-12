@@ -20,10 +20,10 @@
 
 namespace Opis\Session\Storage;
 
-use Opis\Session\SessionStorage;
-use Opis\Session\SessionHandlerInterface;
-use Opis\Database\Database as SQLDatabase;
 use PDOException;
+use SessionHandlerInterface;
+use Opis\Session\SessionStorage;
+use Opis\Database\Database as SQLDatabase;
 
 class Database extends SessionStorage implements SessionHandlerInterface
 {

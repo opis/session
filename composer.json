@@ -16,7 +16,8 @@
         "predis/predis": "0.8.*"
     },
     "autoload": {
-        "psr-0": {"Opis\\Session": ""}
+        "psr-0": {"Opis\\Session": ""},
+        "classmap": ["Opis/Session/PHP"]
     },
     "target-dir": "Opis/Session",
     "config": {

@@ -21,6 +21,7 @@
 namespace Opis\Session;
 
 use RuntimeException;
+use SessionHandlerInterface;
 use Opis\Session\Storage\Native;
 
 class Session implements SessionInterface
