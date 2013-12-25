@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-0": {"Opis\\Session": "lib"},
-        "classmap": ["PHP"]
+        "classmap": ["lib/PHP"]
     },
     "config": {
         "preferred-install": "dist"
