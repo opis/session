@@ -16,9 +16,10 @@
         "predis/predis": "0.8.*"
     },
     "autoload": {
-        "psr-0": {"Opis\\Session": "lib"},
-        "classmap": ["lib/PHP"]
+        "psr-0": {"Opis\\Session\\": ""},
+        "classmap": ["Opis/Session/PHP"]
     },
+    "target-dir": "Opis/Session",
     "config": {
         "preferred-install": "dist"
     },
