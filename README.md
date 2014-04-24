@@ -15,7 +15,7 @@ This library is available on [Packagist](https://packagist.org/packages/opis/ses
 ```json
 {
     "require": {
-        "opis/session": "1.1.*"
+        "opis/session": "1.2.*"
     }
 }
 ```
