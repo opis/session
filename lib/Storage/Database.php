@@ -23,15 +23,18 @@ namespace Opis\Session\Storage;
 use PDOException;
 use SessionHandlerInterface;
 use Opis\Session\SessionStorage;
-use Opis\Database\Database as SQLDatabase;
+use Opis\Database\Connection;
+use Opis\Database\Database as OpisDatabase;
 
 class Database extends SessionStorage implements SessionHandlerInterface
 {
     protected $maxLifetime;
     
-    protected $database;
+    protected $db;
     
     protected $table;
+    
+    protected $columns;
     
     /**
      * Constructor
@@ -40,11 +43,25 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * 
      */
     
-    public function __construct(SQLDatabase $database, $table, $maxLifetime = 0)
+    public function __construct(Connection $connection, $table, $maxLifetime = 0, $columns = null)
     {
-        $this->database = $database;
+        $this->db = new OpisDatabase($connection);
         $this->table = $table;
         $this->maxLifetime = $maxLifetime > 0 ? $maxLifetime : ini_get('session.gc_maxlifetime');
+        
+        if($columns === null || !is_array($columns))
+        {
+            $columns = array();
+        }
+        
+        $columns += array(
+            'id' => 'id',
+            'data' => 'data',
+            'expires' => 'expires',
+        );
+        
+        $this->columns = $columns;
+        
     }
     
     /**
@@ -104,7 +121,9 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            $result = $this->database->from($this->table)->where('id', $id)->column('data');
+            $result = $this->db->from($this->table)
+                               ->where($this->columns['id'], $id)
+                               ->column($this->columns['data']);
             
             return $result === false ? '' : $result;
         }
@@ -126,22 +145,26 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            $result = $this->database->from($this->table)->where('id', $id)->count();
+            $result = $this->db->from($this->table)->where($this->columns['id'], $id)->count();
             
             if($result != 0)
             {
-                return (bool) $this->database
-                                    ->update($this->table)
-                                    ->where('id', $id)
-                                    ->set(array('data' => $data, 'expires' => time() + $this->maxLifetime))
-                                    ->execute();
+                return (bool) $this->db->update($this->table)
+                                        ->where($this->columns['id'], $id)
+                                        ->set(array(
+                                            $this->columns['data'] => $data,
+                                            $this->columns['expires'] => time() + $this->maxLifetime,
+                                        ))
+                                        ->execute();
             }
             else
             {
-                return $this->database
-                            ->insert($this->table, array('id', 'data', 'expires'))
-                            ->values(array($id, $data, time() + $this->maxLifetime))
-                            ->execute();
+                return $this->db->into($this->table)
+                                ->insert(array(
+                                    $this->columns['id'] => $id,
+                                    $this->columns['data'] => $data,
+                                    $this->columns['expires'] => time() + $this->maxLifetime
+                                ));
             }
         }
         catch(PDOException $e)
@@ -162,7 +185,9 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            return (bool) $this->database->from($this->table)->where('id', $id)->delete();
+            return (bool) $this->db->from($this->table)
+                                    ->where($this->columns['id'], $id)
+                                    ->delete();
         }
         catch(PDOException $e)
         {
@@ -182,7 +207,9 @@ class Database extends SessionStorage implements SessionHandlerInterface
     {
         try
         {
-            return (bool) $this->database->from($this->table)->where('expires', time(), '<')->delete();
+            return (bool) $this->db->from($this->table)
+                                    ->where($this->columns['expires'], time(), '<')
+                                    ->delete();
         }
         catch(PDOException $e)
         {
