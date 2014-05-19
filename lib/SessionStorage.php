@@ -38,7 +38,7 @@ abstract class SessionStorage implements SessionInterface
     public function __destruct()
     {
         unset($_SESSION[$this->flashSlot]);
-        $_SESSION[$this->flashSlot] = $this->flashdata;
+        $_SESSION[$this->flashSlot] = $this->flash()->toArray();
     }
     
     
@@ -95,23 +95,18 @@ abstract class SessionStorage implements SessionInterface
     }
 
     /**
-     * Sets or gets flash data from the session.
+     * Access flash object.
      *
-     * @access public
-     * @param string $key Session flash key
-     * @param mixed $data (optional) Flash data
-     * @return mixed
+     * @access  public
+     * 
+     * @return  \Opis\Session\Flash
      */
 
-    public function flash($key, $data = null)
+    public function flash()
     {
-        if($data === null)
+        if($this->flashdata === null)
         {
-            return isset($_SESSION[$this->flashSlot][$key]) ? $_SESSION[$this->flashSlot][$key] : false;
-        }
-        else
-        {
-            $this->flashdata[$key] = $data;
+            $this->flashdata = new Flash();
         }
     }
     
@@ -119,13 +114,14 @@ abstract class SessionStorage implements SessionInterface
      * Extends the lifetime of the flash data by one request.
      *
      * @access public
-     * @param array $keys (optional) Keys to preserve
+     * 
+     * @param   array   $keys   (optional) Keys to preserve
      */
     
     public function reflash(array $keys = array())
     {
         $flashdata = empty($keys) ? $_SESSION[$this->flashSlot] : array_intersect_key($_SESSION[$this->flashSlot], array_flip($keys));
-        $this->flashdata = array_merge($this->flashdata, $flashdata);
+        $this->flash()->clear(array_merge($this->flashdata, $flashdata));
     }
     
     /**
