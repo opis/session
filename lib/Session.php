@@ -75,9 +75,9 @@ class Session implements SessionInterface
         return $this->storage->get($key, $default);
     }
     
-    public function flash($key, $data = null)
+    public function flash()
     {
-        $this->storage->flash($key, $data);
+        $this->storage->flash();
     }
     
     public function reflash(array $keys = array())

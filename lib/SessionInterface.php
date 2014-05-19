@@ -30,7 +30,7 @@ interface SessionInterface
     
     function get($key, $default = null);
     
-    function flash($key, $data = null);
+    function flash();
     
     function reflash(array $keys = array());
     
