@@ -22,10 +22,10 @@ namespace Opis\Session;
 
 abstract class SessionStorage implements SessionInterface
 {
-    /** @var array Flash. */
-    protected $flashdata = array();
+    /** @var    \Opis\Session\Flash Flash object. */
+    protected $flashdata = null;
     
-    /** @var string Flash slot. */
+    /** @var    string              Flash slot. */
     protected $flashSlot = 'opis:flashdata';
     
 

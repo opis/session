@@ -43,16 +43,11 @@ class Database extends SessionStorage implements SessionHandlerInterface
      * 
      */
     
-    public function __construct(Connection $connection, $table, $maxLifetime = 0, $columns = null)
+    public function __construct(Connection $connection, $table, $maxLifetime = 0, array $columns = array())
     {
         $this->db = new OpisDatabase($connection);
         $this->table = $table;
         $this->maxLifetime = $maxLifetime > 0 ? $maxLifetime : ini_get('session.gc_maxlifetime');
-        
-        if($columns === null || !is_array($columns))
-        {
-            $columns = array();
-        }
         
         $columns += array(
             'id' => 'id',
