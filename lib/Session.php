@@ -57,12 +57,12 @@ class Session implements SessionInterface
     
     public function remember($key, $value)
     {
-        $this->storage->remember($key, $value);
+        return $this->storage->remember($key, $value);
     }
     
     public function forget($key)
     {
-        $this->storage->forget($key);
+        return $this->storage->forget($key);
     }
     
     public function has($key)
@@ -77,17 +77,17 @@ class Session implements SessionInterface
     
     public function flash()
     {
-        $this->storage->flash();
+        return $this->storage->flash();
     }
     
     public function reflash(array $keys = array())
     {
-        $this->storage->reflash($keys);
+        return $this->storage->reflash($keys);
     }
     
     public function clear()
     {
-        $this->storage->clear();
+        return $this->storage->clear();
     }
     
     public function id()
@@ -102,7 +102,7 @@ class Session implements SessionInterface
     
     public function dispose()
     {
-        $this->storage->dispose();
+        return $this->storage->dispose();
     }
     
 }
