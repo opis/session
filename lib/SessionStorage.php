@@ -23,7 +23,7 @@ namespace Opis\Session;
 abstract class SessionStorage implements SessionInterface
 {
     /** @var    \Opis\Session\Flash Flash object. */
-    protected $flashdata = null;
+    protected $flashdata;
     
     /** @var    string              Flash slot. */
     protected $flashSlot = 'opis:flashdata';
@@ -108,6 +108,8 @@ abstract class SessionStorage implements SessionInterface
         {
             $this->flashdata = new Flash();
         }
+        
+        return $this->flashdata;
     }
     
     /**
