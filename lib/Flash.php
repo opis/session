@@ -25,6 +25,13 @@ class Flash
     
     protected $data = array();
     
+    protected $session;
+    
+    public function __construct(array $session = array())
+    {
+        $this->session = $session;
+    }
+    
     /**
      * Stores a value
      *
@@ -52,7 +59,12 @@ class Flash
     
     public function get($key, $default = null)
     {
-        return isset($this->data[$key]) ? $this->data[$key] : $default;
+        if(isset($this->data[$key]))
+        {
+            return $this->data[$key];
+        }
+        
+        return isset($this->session[$key]) ? $this->session[$key] : $default;
     }
     
     /**
@@ -79,7 +91,7 @@ class Flash
     
     public function has($key)
     {
-        return isset($this->data[$key]);
+        return isset($this->data[$key]) || isset($this->session[$key]);
     }
     
     /**
@@ -95,7 +107,24 @@ class Flash
     public function clear(array $data = array())
     {
         $this->data = $data;
+        $this->session = array();
         return $this;
+    }
+    
+    /**
+     * Reflash data
+     * 
+     * @access  public
+     *
+     * @param   array   $keys   (optional) Data
+     * 
+     * @return  \Opis\Session\Flash
+     */
+    
+    public function reflash(array $keys = array())
+    {
+        $data = empty($keys) ? $this->session : array_intersect_key($this->session, array_flip($keys));
+        return $this->clear($data);
     }
     
     /**

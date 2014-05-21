@@ -106,7 +106,7 @@ abstract class SessionStorage implements SessionInterface
     {
         if($this->flashdata === null)
         {
-            $this->flashdata = new Flash();
+            $this->flashdata = new Flash(isset($_SESSION[$this->flashSlot]) ? $_SESSION[$this->flashSlot] : array());
         }
         
         return $this->flashdata;
@@ -122,8 +122,7 @@ abstract class SessionStorage implements SessionInterface
     
     public function reflash(array $keys = array())
     {
-        $flashdata = empty($keys) ? $_SESSION[$this->flashSlot] : array_intersect_key($_SESSION[$this->flashSlot], array_flip($keys));
-        $this->flash()->clear(array_merge($this->flashdata, $flashdata));
+        return $this->flash()->reflash($keys);
     }
     
     /**
