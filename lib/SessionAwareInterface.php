@@ -20,25 +20,7 @@
 
 namespace Opis\Session;
 
-interface SessionInterface
-{    
-    function remember($key, $value);
-    
-    function forget($key);
-    
-    function has($key);
-    
-    function get($key, $default = null);
-    
-    function flash();
-    
-    function reflash(array $keys = array());
-    
-    function clear();
-    
-    function id();
-    
-    function regenerate($deleteOld = true);
-    
-    function dispose();
+interface SessionAwareInterface
+{
+    public function setSessionContainer(Session $session);
 }

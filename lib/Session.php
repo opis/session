@@ -44,22 +44,26 @@ class Session
      * @access  public
      *
      * @param   \SessionHandlerInterface    $storage    (optional)  Session storage
-     * @param   \Closure                    $callback   (optional)  Config callback
+     * @param   array                       $callback   (optional)  Session configuration
      */
     
-    public function __construct(SessionHandlerInterface $storage = null, Closure $callback = null)
+    public function __construct(SessionHandlerInterface $storage = null, array $config = array())
     {
         
         $this->storage = $storage;
         
-        $config = new SessionConfig();
+        $config += array(
+            'name' => 'opis',
+            'lifetime' => ini_get('session.cookie_lifetime'),
+            'domain' => ini_get('session.cookie_domain'),
+            'path' => ini_get('session.cookie_path'),
+            'secure' => ini_get('session.cookie_secure'),
+            'httponly' => ini_get('session.cookie_httponly'),
+            'gc_maxlifetime' => ini_get('session.gc_maxlifetime'),
+            'flashslot' => 'opis:flashdata',
+        );
         
-        if($callback !== null)
-        {
-            $callback($config);
-        }
-        
-        $this->config = $config->toArray();
+        $this->config = $config;
         
         if($storage !== null)
         {
@@ -72,6 +76,11 @@ class Session
                 array($storage, 'destroy'),
                 array($storage, 'gc')
             );
+            
+            if($storage instanceof SessionAwareInterface)
+            {
+                $storage->setSessionContainer($this);
+            }
         }
         
         session_name($this->config['name']);
@@ -147,7 +156,7 @@ class Session
     }
     
     /**
-     * Returns TRUE if key exists in the session and FALSE if not.
+     * Checks if the key was set.
      *
      * @access  public
      * 
@@ -175,6 +184,28 @@ class Session
     public function get($key, $default = null)
     {
         return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
+    }
+    
+    /**
+     * Gets a value from session if the key exists, otherwise associate
+     * the specified key with the value returned by invoking the callback.
+     *
+     * @access  public
+     * 
+     * @param   string      $key        Session key
+     * @param   \Closure    $callback   Callback function
+     * 
+     * @return mixed
+     */
+    
+    public function load($key, Closure $callback)
+    {
+        if(!$this->has($key))
+        {
+            $this->set($key, $callback($key));
+        }
+        
+        return $this->get($key);
     }
     
     /**
@@ -267,6 +298,85 @@ class Session
     public function dispose()
     {
         return $this->destroy();
+    }
+    
+    /**
+     * Session's path
+     *
+     * @access  public
+     *
+     * @return  string
+     */
+    
+    public function path()
+    {
+        return $this->config['path'];
+    }
+    
+    /**
+     * Session's domain
+     *
+     * @access  public
+     *
+     * @return  string
+     */
+    
+    public function domain()
+    {
+        return $this->config['domain'];
+    }
+    
+    /**
+     * Session's life time
+     *
+     * @access  public
+     *
+     * @return  int
+     */
+    
+    public function lifetime()
+    {
+        return (int) $this->config['lifetime'];
+    }
+    
+    
+    /**
+     * Garbage collector's max life time
+     *
+     * @access  public
+     *
+     * @return  int
+     */
+    
+    public function gcmaxLifetime()
+    {
+        return (int) $this->config['gc_maxlifetime'];
+    }
+    
+    /**
+     * Check if session is http-only
+     *
+     * @access  public
+     *
+     * @return  boolean
+     */
+    
+    public function isHttpOnly()
+    {
+        return (bool) $this->config['httponly'];
+    }
+    
+    /**
+     * Check if session is sescure
+     *
+     * @access  public
+     *
+     * @return  boolean
+     */
+    
+    public function isSecure()
+    {
+        return (bool) $this->config['secure'];
     }
     
 }
