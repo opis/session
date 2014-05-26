@@ -112,7 +112,7 @@ class Mongo implements SessionHandlerInterface
 
     public function write($id, $data)
     {
-        $this->mongo->save(array('_id' => $id, 'expries' => time() + $this->maxLifetime, 'data' => $data));
+        $this->mongo->save(array('_id' => $id, 'expires' => time() + $this->maxLifetime, 'data' => $data));
         return true;
     }
 
