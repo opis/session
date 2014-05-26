@@ -25,7 +25,7 @@ use Closure;
 use SessionHandlerInterface;
 
 class Session
-{
+{  
     /** @var    array   Session configuration. */
     protected $config;
     
@@ -54,13 +54,12 @@ class Session
         
         $config += array(
             'name' => 'opis',
+            'flashslot' => 'opis:flashdata',
             'lifetime' => ini_get('session.cookie_lifetime'),
             'domain' => ini_get('session.cookie_domain'),
             'path' => ini_get('session.cookie_path'),
             'secure' => ini_get('session.cookie_secure'),
             'httponly' => ini_get('session.cookie_httponly'),
-            'gc_maxlifetime' => ini_get('session.gc_maxlifetime'),
-            'flashslot' => 'opis:flashdata',
         );
         
         $this->config = $config;
@@ -76,13 +75,9 @@ class Session
                 array($storage, 'destroy'),
                 array($storage, 'gc')
             );
-            
-            if($storage instanceof SessionAwareInterface)
-            {
-                $storage->setSessionContainer($this);
-            }
         }
         
+        $this->flashslot = $this->config['flashslot'];
         session_name($this->config['name']);
         
         session_set_cookie_params(
@@ -92,8 +87,6 @@ class Session
             $this->config['secure'],
             $this->config['httponly']
         );
-        
-        $this->flashslot = $this->config['flashslot'];
         
         session_start();
     }
@@ -108,6 +101,7 @@ class Session
     {
         unset($_SESSION[$this->flashslot]);
         $_SESSION[$this->flashslot] = $this->flash()->toArray();
+        session_write_close();
     }
     
     /**
@@ -298,85 +292,6 @@ class Session
     public function dispose()
     {
         return $this->destroy();
-    }
-    
-    /**
-     * Session's path
-     *
-     * @access  public
-     *
-     * @return  string
-     */
-    
-    public function path()
-    {
-        return $this->config['path'];
-    }
-    
-    /**
-     * Session's domain
-     *
-     * @access  public
-     *
-     * @return  string
-     */
-    
-    public function domain()
-    {
-        return $this->config['domain'];
-    }
-    
-    /**
-     * Session's life time
-     *
-     * @access  public
-     *
-     * @return  int
-     */
-    
-    public function lifetime()
-    {
-        return (int) $this->config['lifetime'];
-    }
-    
-    
-    /**
-     * Garbage collector's max life time
-     *
-     * @access  public
-     *
-     * @return  int
-     */
-    
-    public function gcmaxLifetime()
-    {
-        return (int) $this->config['gc_maxlifetime'];
-    }
-    
-    /**
-     * Check if session is http-only
-     *
-     * @access  public
-     *
-     * @return  boolean
-     */
-    
-    public function isHttpOnly()
-    {
-        return (bool) $this->config['httponly'];
-    }
-    
-    /**
-     * Check if session is sescure
-     *
-     * @access  public
-     *
-     * @return  boolean
-     */
-    
-    public function isSecure()
-    {
-        return (bool) $this->config['secure'];
     }
     
 }
