@@ -23,7 +23,21 @@ namespace Opis\Session;
 class SessionConfig
 {
     
-    protected $config = array();
+    protected $config;
+    
+    
+    public function __construct()
+    {
+        $this->config = array(
+            'name' => 'opis',
+            'lifetime' => ini_get('session.cookie_lifetime'),
+            'domain' => ini_get('session.cookie_domain'),
+            'path' => ini_get('session.cookie_path'),
+            'secure' => ini_get('session.cookie_secure'),
+            'httponly' => ini_get('session.cookie_httponly'),
+            'flashslot' => 'opis:flashdata',
+        );
+    }
     
     /**
      * Set session's name
@@ -120,6 +134,33 @@ class SessionConfig
     {
         $this->config['httponly'] = (bool) $value;
         return $this;
+    }
+    
+    /**
+     * Set session's flash slot name
+     *
+     * @access  public
+     *
+     * @param   string    $value  (optional) Flash slot name
+     *
+     * @return  \Opis\Session\SessionConfig Self reference
+     */
+    
+    public function flashSlot($value = 'opis:flashdata')
+    {
+        $this->config['flashslot'] = (string) $value;
+        return $this;
+    }
+    
+    /**
+     * Gets all settings as an array
+     *
+     * @return  array
+     */
+    
+    public function toArray()
+    {
+        return $this->config;
     }
     
 }
