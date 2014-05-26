@@ -8,14 +8,14 @@ Session library
 --------------
 
 
-###Installation
+### Installation
 
 This library is available on [Packagist](https://packagist.org/packages/opis/session) and can be installed using [Composer](http://getcomposer.org)
 
 ```json
 {
     "require": {
-        "opis/session": "1.3.*"
+        "opis/session": "2.0.*"
     }
 }
 ```
