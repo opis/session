@@ -22,9 +22,8 @@ namespace Opis\Session\Storage;
 
 use SessionHandlerInterface;
 use Predis\Client;
-use Opis\Session\SessionStorage;
 
-class Redis extends SessionStorage implements SessionHandlerInterface
+class Redis implements SessionHandlerInterface
 {
  
     protected $prefix;
@@ -36,7 +35,7 @@ class Redis extends SessionStorage implements SessionHandlerInterface
     /**
      * Constructor
      *
-     * @access public
+     * @access  public
      * 
      */
     
@@ -50,15 +49,11 @@ class Redis extends SessionStorage implements SessionHandlerInterface
     /**
      * Destructor.
      *
-     * @access public
+     * @access  public
      */
 
     public function __destruct()
-    {
-        parent::__destruct();
-        
-        session_write_close();
-        
+    {   
         $this->redis = null;
     }
 
@@ -67,8 +62,10 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * Open session.
      *
      * @access  public
-     * @param   string   $savePath     Save path
-     * @param   string   $sessionName  Session name
+     * 
+     * @param   string  $savePath       Save path
+     * @param   string  $sessionName    Session name
+     * 
      * @return  boolean
      */
 
@@ -81,6 +78,7 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * Close session.
      *
      * @access  public
+     * 
      * @return  boolean
      */
 
@@ -93,7 +91,9 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * Returns session data.
      *
      * @access  public
-     * @param   string  $id  Session id
+     * 
+     * @param   string  $id Session id
+     * 
      * @return  string
      */
 
@@ -106,8 +106,11 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * Writes data to the session.
      *
      * @access  public
-     * @param   string  $id    Session id
-     * @param   string  $data  Session data
+     * 
+     * @param   string  $id     Session id
+     * @param   string  $data   Session data
+     *
+     * @return   boolean
      */
 
     public function write($id, $data)
@@ -136,7 +139,9 @@ class Redis extends SessionStorage implements SessionHandlerInterface
      * Garbage collector.
      *
      * @access  public
+     * 
      * @param   int      $maxLifetime  Lifetime in secods
+     * 
      * @return  boolean
      */
 

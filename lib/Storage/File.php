@@ -21,18 +21,18 @@
 namespace Opis\Session\Storage;
 
 use SessionHandlerInterface;
-use Opis\Session\SessionStorage;
 
-class File extends SessionStorage implements SessionHandlerInterface
+class File implements SessionHandlerInterface
 {
-    /** @var string Path. */
+    /** @var    string  Path. */
     protected $path;
     
     /**
      * Constructor
      *
-     * @access public
-     * @param string $path Folder path.
+     * @access  public
+     * 
+     * @param   string  $path   Folder path.
      */
     
     public function __construct($path)
@@ -47,9 +47,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      */
 
     public function __destruct()
-    {
-        parent::__destruct();
-        session_write_close();
+    {   
         // Fixes issue with Debian and Ubuntu session garbage collection
         if(mt_rand(1, 100) === 100)
         {
@@ -61,8 +59,10 @@ class File extends SessionStorage implements SessionHandlerInterface
      * Open session.
      *
      * @access  public
-     * @param   string   $savePath     Save path
-     * @param   string   $sessionName  Session name
+     * 
+     * @param   string  $savePath       Save path
+     * @param   string  $sessionName    Session name
+     * 
      * @return  boolean
      */
 
@@ -75,6 +75,7 @@ class File extends SessionStorage implements SessionHandlerInterface
      * Close session.
      *
      * @access  public
+     * 
      * @return  boolean
      */
 
@@ -87,7 +88,9 @@ class File extends SessionStorage implements SessionHandlerInterface
      * Returns session data.
      *
      * @access  public
-     * @param   string  $id  Session id
+     * 
+     * @param   string  $id Session id
+     * 
      * @return  string
      */
 
@@ -139,13 +142,16 @@ class File extends SessionStorage implements SessionHandlerInterface
      * Garbage collector.
      *
      * @access  public
-     * @param   int      $maxLifetime  Lifetime in secods
+     * 
+     * @param   int     $maxLifetime  Lifetime in secods
+     * 
      * @return  boolean
      */
 
     public function gc($maxLifetime)
     {
         $files = glob($this->path . '/*');
+        
         if(is_array($files))
         {
             foreach($files as $file)
@@ -156,6 +162,7 @@ class File extends SessionStorage implements SessionHandlerInterface
                 }
             }
         }
+        
         return true;
     }
 }

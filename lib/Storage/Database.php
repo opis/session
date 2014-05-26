@@ -22,11 +22,10 @@ namespace Opis\Session\Storage;
 
 use PDOException;
 use SessionHandlerInterface;
-use Opis\Session\SessionStorage;
 use Opis\Database\Connection;
 use Opis\Database\Database as OpisDatabase;
 
-class Database extends SessionStorage implements SessionHandlerInterface
+class Database implements SessionHandlerInterface
 {
     protected $maxLifetime;
     
@@ -39,8 +38,7 @@ class Database extends SessionStorage implements SessionHandlerInterface
     /**
      * Constructor
      *
-     * @access public
-     * 
+     * @access  public
      */
     
     public function __construct(Connection $connection, $table, $maxLifetime = 0, array $columns = array())
@@ -66,10 +64,8 @@ class Database extends SessionStorage implements SessionHandlerInterface
      */
 
     public function __destruct()
-    {
-        parent::__destruct();
-        
-        session_write_close();
+    {   
+        // Fixes issue with Debian and Ubuntu session garbage collection
         
         if(mt_rand(1, 100) === 100)
         {

@@ -50,9 +50,7 @@ class Mongo implements SessionHandlerInterface
 
     public function __destruct()
     {
-        parent::__destruct();
-        
-        session_write_close();
+        // Fixes issue with Debian and Ubuntu session garbage collection
         
         if(mt_rand(1, 100) === 100)
         {
@@ -106,8 +104,11 @@ class Mongo implements SessionHandlerInterface
      * Writes data to the session.
      *
      * @access  public
+     * 
      * @param   string  $id    Session id
      * @param   string  $data  Session data
+     *
+     * @return  boolean
      */
 
     public function write($id, $data)
@@ -133,7 +134,9 @@ class Mongo implements SessionHandlerInterface
      * Garbage collector.
      *
      * @access  public
+     *
      * @param   int      $maxLifetime  Lifetime in secods
+     * 
      * @return  boolean
      */
 
