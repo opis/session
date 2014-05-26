@@ -20,6 +20,8 @@
 
 namespace Opis\Session;
 
+use Closure;
+
 class Flash
 {
     
@@ -65,6 +67,28 @@ class Flash
         }
         
         return isset($this->session[$key]) ? $this->session[$key] : $default;
+    }
+    
+    /**
+     * Retrive the value associated with the specified key or associate
+     * the specified key with the value returned by invoking the callback.
+     *
+     * @access  public
+     *
+     * @param   string      $key        Key
+     * @param   \Closure    $callback   Callback   
+     *
+     * @return  mixed
+     */
+    
+    public function load($key, Closure $callback)
+    {
+        if(!$this->has($key))
+        {
+            $this->set($key, $callback($key));
+        }
+        
+        return $this->get($key);
     }
     
     /**
