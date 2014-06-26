@@ -1,5 +1,8 @@
 CHANGELOG
 -------------
+### Opis Session 2.1.0, 2014.06.26
+
+* Updated `opis/database` library dependency to version `1.3.*`
 
 ### Opis Session 2.0.0, 2014.05.27
 
