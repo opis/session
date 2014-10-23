@@ -113,7 +113,7 @@ class Database implements SessionHandlerInterface
         try
         {
             $result = $this->db->from($this->table)
-                               ->where($this->columns['id'], $id)
+                               ->where($this->columns['id'])->eq($id)
                                ->column($this->columns['data']);
             
             return $result === false ? '' : $result;
@@ -136,26 +136,27 @@ class Database implements SessionHandlerInterface
     {
         try
         {
-            $result = $this->db->from($this->table)->where($this->columns['id'], $id)->count();
+            $result = $this->db->from($this->table)
+                               ->where($this->columns['id'])->eq($id)
+                               ->count();
             
             if($result != 0)
             {
                 return (bool) $this->db->update($this->table)
-                                        ->where($this->columns['id'], $id)
+                                        ->where($this->columns['id'])->eq($id)
                                         ->set(array(
                                             $this->columns['data'] => $data,
                                             $this->columns['expires'] => time() + $this->maxLifetime,
-                                        ))
-                                        ->execute();
+                                        ));
             }
             else
             {
-                return $this->db->into($this->table)
-                                ->insert(array(
+                return $this->db->insert(array(
                                     $this->columns['id'] => $id,
                                     $this->columns['data'] => $data,
                                     $this->columns['expires'] => time() + $this->maxLifetime
-                                ));
+                                ))
+                                ->into($this->table);
             }
         }
         catch(PDOException $e)
@@ -177,8 +178,8 @@ class Database implements SessionHandlerInterface
         try
         {
             return (bool) $this->db->from($this->table)
-                                    ->where($this->columns['id'], $id)
-                                    ->delete();
+                                   ->where($this->columns['id'])->eq($id)
+                                   ->delete();
         }
         catch(PDOException $e)
         {
@@ -199,8 +200,8 @@ class Database implements SessionHandlerInterface
         try
         {
             return (bool) $this->db->from($this->table)
-                                    ->where($this->columns['expires'], time(), '<')
-                                    ->delete();
+                                   ->where($this->columns['expires'])->lt(time())
+                                   ->delete();
         }
         catch(PDOException $e)
         {
