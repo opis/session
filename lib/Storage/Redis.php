@@ -45,17 +45,6 @@ class Redis implements SessionHandlerInterface
         $this->prefix = $prefix;
         $this->maxLifetime = $maxLifetime > 0 ? $maxLifetime : ini_get('session.gc_maxlifetime');
     }
-    
-    /**
-     * Destructor.
-     *
-     * @access  public
-     */
-
-    public function __destruct()
-    {   
-        $this->redis = null;
-    }
 
 
     /**
