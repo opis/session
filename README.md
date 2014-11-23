@@ -4,56 +4,45 @@ Opis Session
 [![Latest Unstable Version](https://poser.pugx.org/opis/session/v/unstable.png)](//packagist.org/packages/opis/session)
 [![License](https://poser.pugx.org/opis/session/license.png)](https://packagist.org/packages/opis/session)
 
-Session library
+Session manager
 --------------
+**Opis Session** is a session manager library with support for multiple backend storages that provides
+developers with an API which allows them to handle session related informations in a standardised way.
 
+The currently supported storages are: Database, File, Mongo and Redis. 
+
+### License
+
+**Opis Session** is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0). 
+
+### Requirements
+
+* PHP 5.3.* or higher
+* [Opis Database](http://www.opis.io/database) 2.0.* (for Database storage)
+* [Predis](https://github.com/nrk/predis) 1.0.* (for Redis storage)
 
 ### Installation
 
-This library is available on [Packagist](https://packagist.org/packages/opis/session) and can be installed using [Composer](http://getcomposer.org)
+This library is available on [Packagist](https://packagist.org/packages/opis/session) and can be installed using [Composer](http://getcomposer.org).
 
 ```json
 {
     "require": {
-        "opis/session": "2.2.*"
+        "opis/session": "2.3.*"
     }
 }
 ```
 
-### Examples
+If you are unable to use [Composer](http://getcomposer.org) you can download the
+[tar.gz](https://github.com/opis/session/archive/2.3.0.tar.gz) or the [zip](https://github.com/opis/session/archive/2.3.0.zip)
+archive file, extract the content of the archive and include de `autoload.php` file into your project. 
 
 ```php
-use Opis\Session\Session;
 
-$session = new Session();
+require_once 'path/to/session-2.3.0/autoload.php';
 
-//Write to session
-$session->set('email', 'email@example.com');
-
-$session->set('primes', array(11, 19, 23));
-
-//Read from session
-$user = $session->get('user');
-
-//..specify a default value that will be returned if the specified key was not set.
-
-$user = $session->get('user', 'anonymous');
-
-/**
- * Use the load method to read values from session. If the specified key was not set,
- * it will be initialized with the value returned by the anonymous function callback.
- */
-
-$number = $session->load('number', function($key){
-    return 3.14159265359;
-});
-
-//Deletes a key from session
-$session->delete('email');
-
-//Delete all keys
-$session->clear();
-
-//Destroy a session
-$session->destroy();
 ```
+
+### Documentation
+
+Examples and documentation can be found at http://opis.io/session .
