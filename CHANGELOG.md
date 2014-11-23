@@ -5,6 +5,7 @@ CHANGELOG
 * Added an autoload file.
 * Changed how the `regenerate` method in `Opis\Session\Session` works. If the argument passed
 to the method is `true` the the old data are kept, otherwise the old data are deleted.
+* Updated `predis/predis` library dependency to version `1.0.*`
 
 ### Opis Session 2.2.1, 2014.11.16
 
