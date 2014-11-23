@@ -1,8 +1,8 @@
 {
     "name": "opis/session",
-    "description": "Opis Session",
-    "keywords": ["opis", "session"],
-    "homepage": "http://opis.io",
+    "description": "Opis Session is a session manager library with support for multiple backend storages that provides developers with an API which allows them to handle session related informations in a standardised way.",
+    "keywords": ["opis", "session", "session storage", "session redis"],
+    "homepage": "http://www.opis.io/session",
     "license": "Apache-2.0",
     "authors": [
         {
