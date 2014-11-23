@@ -262,14 +262,14 @@ class Session
      *
      * @access  public
      * 
-     * @param   boolean $deleteOld  (optional) Delete the session data associated with the old id
+     * @param   boolean $keep  (optional) Delete old data associated with the old ID
      * 
      * @return  boolean
      */
         
-    public function regenerate($deleteOld = true)
+    public function regenerate($kepp = false)
     {
-        return session_regenerate_id($deleteOld);
+        return session_regenerate_id(!$kepp);
     }
     
     /**
