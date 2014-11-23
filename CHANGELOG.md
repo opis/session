@@ -1,5 +1,15 @@
 CHANGELOG
 -------------
+### Opis Session 2.3.0, 2014.11.23
+
+* Added an autoload file.
+* Changed how the `regenerate` method in `Opis\Session\Session` works. If the argument passed
+to the method is `true` the the old data are kept, otherwise the old data are deleted.
+
+### Opis Session 2.2.1, 2014.11.16
+
+* Fixed a bug in `Opis\Session\Storage\Redis`
+
 ### Opis Session 2.2.0, 2014.10.23
 
 * Updated `opis/database` library dependency to version `2.0.*`
