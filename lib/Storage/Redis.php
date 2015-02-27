@@ -121,7 +121,7 @@ class Redis implements SessionHandlerInterface
 
     public function destroy($id)
     {
-        return (bool) $this->redis->delete($this->prefix . $id);
+        return (bool) $this->redis->del($this->prefix . $id);
     }
 
     /**
