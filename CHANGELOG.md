@@ -1,5 +1,10 @@
 CHANGELOG
 -------------
+### Opis Session 2.4.0, 2015.07.31
+
+* Removed some properties form `composer.json` file
+* Updated `opis/database` library dependency to version `^2.1.1`
+
 ### Opis Session 2.3.0, 2014.11.23
 
 * Added an autoload file.
