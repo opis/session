@@ -9,7 +9,11 @@ Session manager
 **Opis Session** is a session manager library with support for multiple backend storages that provides
 developers with an API which allows them to handle session related informations in a standardised way.
 
-The currently supported storages are: Database, File, Mongo and Redis. 
+The currently supported storages are: File, Mongo and the native storage. 
+
+##### Important!
+
+You can install additional storage adapters, for SQL databases and Redis, by using the optional [Opis Storages](https://github.com/opis/storages) package.
 
 ### License
 
@@ -18,8 +22,6 @@ The currently supported storages are: Database, File, Mongo and Redis.
 ### Requirements
 
 * PHP 5.3.* or higher
-* [Opis Database](http://www.opis.io/database) ^2.1.1 (for Database storage)
-* [Predis](https://github.com/nrk/predis) 1.0.* (for Redis storage)
 
 ### Installation
 
@@ -28,18 +30,18 @@ This library is available on [Packagist](https://packagist.org/packages/opis/ses
 ```json
 {
     "require": {
-        "opis/session": "2.4.*"
+        "opis/session": "^3.0.*"
     }
 }
 ```
 
 If you are unable to use [Composer](http://getcomposer.org) you can download the
-[tar.gz](https://github.com/opis/session/archive/2.4.0.tar.gz) or the [zip](https://github.com/opis/session/archive/2.4.0.zip)
+[tar.gz](https://github.com/opis/session/archive/3.0.0.tar.gz) or the [zip](https://github.com/opis/session/archive/3.0.0.zip)
 archive file, extract the content of the archive and include de `autoload.php` file into your project. 
 
 ```php
 
-require_once 'path/to/session-2.4.0/autoload.php';
+require_once 'path/to/session-3.0.0/autoload.php';
 
 ```
 
