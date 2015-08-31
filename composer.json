@@ -11,9 +11,10 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0",
-        "opis/database": "^2.1.1",
-        "predis/predis": "1.0.*"
+        "php": ">=5.3.0"
+    },
+    "suggest": {
+        "opis/storages": "Store users' session data using Redis and SQL databases"
     },
     "autoload": {
         "psr-4": {"Opis\\Session\\": "lib/"},
