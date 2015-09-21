@@ -38,6 +38,12 @@ class File implements SessionHandlerInterface
     public function __construct($path)
     {
         $this->path = $path;
+        
+        if (!is_dir($path) && !$this->createPath($path)) {
+            throw new \RuntimeException('Session directory does not exist or is not writable: "' . $path . '".');
+        } else if (!is_writable($path)) {
+            throw new \RuntimeException('Session directory is not writable: "' . $path . '".');
+        }
     }
     
     /**
@@ -164,5 +170,30 @@ class File implements SessionHandlerInterface
         }
         
         return true;
+    }
+    
+    /**
+     * Attempts to create session save path
+     * 
+     * @param string $path
+     * @return boolean
+     */
+    private function createPath($path)
+    {
+        $directories = explode('/', str_replace('\\', '/', $path));
+        $dirToCreate = array();
+        while (count($directories)) {
+            $path = implode('/', $directories);
+            
+            if (is_dir($path) && is_writable($path)) {
+                return mkdir($path . '/' . implode('/', $dirToCreate), 0777, true);
+            } elseif (is_dir($path)) {
+                return false;
+            }
+            
+            array_unshift($dirToCreate, array_pop($directories));
+        }
+        
+        return false;
     }
 }
