@@ -2,7 +2,7 @@ CHANGELOG
 -------------
 ### v3.1.0, 2015.09.22
 
-* `Opis\Session\Storage\File` was modified and now it's throwing an exception if you don't
+* `Opis\Session\Storage\File` was modified and now throws an exception if you don't
 have write permissions or if the specified path does not exist and it can't be created.
 See [issue #7](https://github.com/opis/session/issues/7)
 
