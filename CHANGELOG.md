@@ -1,5 +1,9 @@
 CHANGELOG
 -------------
+### v3.0.1, 2015.09.22
+
+* Modified `Opis\Session\Storage\File` class. See #7
+
 ### v3.0.0, 2015.08.31
 
 * `Opis\Session\Storage\Database` and `Opis\Session\Storage\Redis` classes were moved into
