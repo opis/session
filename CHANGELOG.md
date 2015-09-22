@@ -1,8 +1,10 @@
 CHANGELOG
 -------------
-### v3.0.1, 2015.09.22
+### v3.1.0, 2015.09.22
 
-* Modified `Opis\Session\Storage\File` class. See [issue #7](https://github.com/opis/session/issues/7)
+* `Opis\Session\Storage\File` was modified and now it's throwing an exception if you don't
+have write permissions or if the specified path does not exist and it can't be created.
+See [issue #7](https://github.com/opis/session/issues/7)
 
 ### v3.0.0, 2015.08.31
 
