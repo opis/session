@@ -2,7 +2,7 @@ CHANGELOG
 -------------
 ### v3.0.1, 2015.09.22
 
-* Modified `Opis\Session\Storage\File` class. See #7
+* Modified `Opis\Session\Storage\File` class. See [#7](https://github.com/opis/session/issues/7)
 
 ### v3.0.0, 2015.08.31
 
