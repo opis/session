@@ -38,6 +38,13 @@ class File implements SessionHandlerInterface
     public function __construct($path)
     {
         $this->path = $path;
+        
+        if (!is_dir($path) && !@mkdir($path, 0777, true)) {
+            throw new \RuntimeException('Session directory does not exist: "' . $path . '".');
+        } 
+        if (!is_writable($path)) {
+            throw new \RuntimeException('Session directory is not writable: "' . $path . '".');
+        }
     }
     
     /**
@@ -165,4 +172,5 @@ class File implements SessionHandlerInterface
         
         return true;
     }
+    
 }
