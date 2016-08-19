@@ -9,7 +9,7 @@ Session manager
 **Opis Session** is a session manager library with support for multiple backend stores, providing
 developers with an API which allows them to handle session related information in a standardised way.
 
-The currently supported stores are: File and native store. 
+The currently available handlers are: File and native store. 
 
 ### License
 
