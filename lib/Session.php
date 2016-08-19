@@ -102,24 +102,6 @@ class Session
     }
     
     /**
-     * @deprecated  since 2.0.0
-     */
-    
-    public function remember($key, $value)
-    {
-        return $this->set($key, $value);
-    }
-    
-    /**
-     * @deprecated  since 2.0.0
-     */
-    
-    public function forget($key)
-    {
-        return $this->delete($key);
-    }
-    
-    /**
      * Stores a value in the session.
      *
      * @access  public
