@@ -17,49 +17,43 @@
 
 namespace Opis\Session;
 
-use Closure;
-
 class Flash
 {
-    
+    /** @var array  */
     protected $data = array();
-    
+
+    /** @var array */
     protected $session;
     
-    public function __construct(array $session = array())
+    public function __construct(array $session = [])
     {
         $this->session = $session;
     }
-    
+
     /**
      * Stores a value
      *
-     * @access  public
-     *
-     * @return  \Opis\Session\Flash
+     * @param string $key
+     * @param mixed $value
+     * @return Flash
      */
-    
-    public function set($key, $value)
+    public function set(string $key, $value): self
     {
         $this->data[$key] = $value;
         return $this;
     }
     
     /**
-     * Retrive a value
-     * 
-     * @access  public
+     * Retrieve a value
      *
      * @param   string  $key        Key
      * @param   mixed   $default    (optional)  Default value
      * 
-     * @return  \Opis\Session\Flash
+     * @return  mixed
      */
-    
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
-        if(isset($this->data[$key]))
-        {
+        if(isset($this->data[$key])) {
             return $this->data[$key];
         }
         
@@ -67,21 +61,18 @@ class Flash
     }
     
     /**
-     * Retrive the value associated with the specified key or associate
+     * Retrieve the value associated with the specified key or associate
      * the specified key with the value returned by invoking the callback.
      *
-     * @access  public
-     *
      * @param   string      $key        Key
-     * @param   \Closure    $callback   Callback   
+     * @param   callable    $callback   Callback
      *
      * @return  mixed
      */
     
-    public function load($key, Closure $callback)
+    public function load(string $key, callable $callback)
     {
-        if(!$this->has($key))
-        {
+        if(!$this->has($key)) {
             $this->set($key, $callback($key));
         }
         
@@ -91,12 +82,10 @@ class Flash
     /**
      * Removes specified key
      *
-     * @access  public
-     *
-     * @return  \Opis\Session\Flash
+     * @return  Flash
      */
     
-    public function delete($key)
+    public function delete($key): self
     {
         unset($this->data[$key]);
         return $this;
@@ -105,12 +94,10 @@ class Flash
     /**
      * Check if a key exists
      *
-     * @access  public
-     *
      * @return  boolean
      */
     
-    public function has($key)
+    public function has($key): bool
     {
         return isset($this->data[$key]) || isset($this->session[$key]);
     }
@@ -122,27 +109,25 @@ class Flash
      *
      * @param   array   $data   (optional) Data
      * 
-     * @return  \Opis\Session\Flash
+     * @return  Flash
      */
     
-    public function clear(array $data = array())
+    public function clear(array $data = []): self
     {
         $this->data = $data;
-        $this->session = array();
+        $this->session = [];
         return $this;
     }
     
     /**
      * Reflash data
-     * 
-     * @access  public
      *
      * @param   array   $keys   (optional) Data
      * 
-     * @return  \Opis\Session\Flash
+     * @return  Flash
      */
     
-    public function reflash(array $keys = array())
+    public function reflash(array $keys = []): self
     {
         $data = empty($keys) ? $this->session : array_intersect_key($this->session, array_flip($keys));
         return $this->clear($data);
@@ -150,13 +135,11 @@ class Flash
     
     /**
      * Return saved data
-     * 
-     * @access  public
-     * 
+     *
      * @return  array
      */
     
-    public function toArray()
+    public function toArray(): array
     {
         return $this->data;
     }
