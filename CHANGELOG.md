@@ -1,5 +1,14 @@
 CHANGELOG
--------------
+---------
+### v4.0.x-dev
+
+* Removed support for PHP 5.x
+* Added support for PHP 7
+* Removed `SessionHandlerInterface` interface
+* Removed MongoDB support
+* Renamed `Opis\Session\Storage` namespace to `Opis\Session\Stores`
+
+
 ### v3.1.0, 2015.09.22
 
 * `Opis\Session\Storage\File` was modified and now throws an exception if you don't
