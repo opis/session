@@ -264,13 +264,4 @@ class Session
         return session_destroy();
     }
     
-    /**
-     * @deprecated  since 2.0.0
-     */
-    
-    public function dispose()
-    {
-        return $this->destroy();
-    }
-    
 }
