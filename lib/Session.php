@@ -17,7 +17,6 @@
 
 namespace Opis\Session;
 
-use SessionHandler;
 use SessionHandlerInterface;
 
 class Session
@@ -37,17 +36,12 @@ class Session
     /**
      * Constructor
      *
-     * @param   SessionHandlerInterface    $storage    (optional)  Session storage
+     * @param   SessionHandlerInterface  $storage Session store object
      * @param   array $config   (optional)  Session configuration
      */
     
-    public function __construct(SessionHandlerInterface $storage = null, array $config = [])
+    public function __construct(SessionHandlerInterface $storage, array $config = [])
     {
-        
-        if($storage === null){
-            $storage = new SessionHandler();
-        }
-        
         $config += [
             'name' => 'opis',
             'flashslot' => 'opis:flashdata',
@@ -62,7 +56,7 @@ class Session
         $this->config = $config;
         $this->flashslot = $config['flashslot'];
         
-        session_set_save_handler($storage);
+        session_set_save_handler($storage, false);
         session_name($config['name']);
         session_set_cookie_params(
             $config['lifetime'],

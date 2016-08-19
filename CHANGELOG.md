@@ -8,6 +8,7 @@ CHANGELOG
 * Removed MongoDB support
 * Renamed `Opis\Session\Storage` namespace to `Opis\Session\Stores`
 * Removed deprecated methods from `Opis\Session\Session`
+* The `SessionHandlerInterface` argument is no longer optional in `Opis\Session\Session` class
 
 
 ### v3.1.0, 2015.09.22
