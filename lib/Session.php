@@ -132,7 +132,7 @@ class Session
     
     public function get(string $key, $default = null)
     {
-        return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
+        return $_SESSION[$key] ?? $default;
     }
     
     /**
@@ -163,7 +163,7 @@ class Session
     public function flash(): Flash
     {
         if($this->flashdata === null) {
-            $this->flashdata = new Flash(isset($_SESSION[$this->flashslot]) ? $_SESSION[$this->flashslot] : array());
+            $this->flashdata = new Flash($_SESSION[$this->flashslot] ?? []);
         }
         
         return $this->flashdata;

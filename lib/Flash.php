@@ -57,7 +57,7 @@ class Flash
             return $this->data[$key];
         }
         
-        return isset($this->session[$key]) ? $this->session[$key] : $default;
+        return $this->session[$key] ?? $default;
     }
     
     /**
