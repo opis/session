@@ -17,39 +17,38 @@
 
 namespace Opis\Session;
 
-use RuntimeException;
-use Closure;
+use SessionHandler;
 use SessionHandlerInterface;
 
 class Session
 {  
-    /** @var    array   Session configuration. */
+    /** @var array   Session configuration. */
     protected $config;
     
-    /** @var    \Opis\Session\Flash Flash object. */
+    /** @var Flash Flash object. */
     protected $flashdata;
     
-    /** @var    string  Flash slot name */
+    /** @var string  Flash slot name */
     protected $flashslot;
     
-    /** @var    \SessionHandlerInterface    Session storage. */
+    /** @var SessionHandlerInterface    Session storage. */
     protected $storage;
     
     /**
      * Constructor
      *
-     * @access  public
-     *
-     * @param   \SessionHandlerInterface    $storage    (optional)  Session storage
-     * @param   array                       $callback   (optional)  Session configuration
+     * @param   SessionHandlerInterface    $storage    (optional)  Session storage
+     * @param   array $config   (optional)  Session configuration
      */
     
-    public function __construct(SessionHandlerInterface $storage = null, array $config = array())
+    public function __construct(SessionHandlerInterface $storage = null, array $config = [])
     {
         
-        $this->storage = $storage;
+        if($storage === null){
+            $storage = new SessionHandler();
+        }
         
-        $config += array(
+        $config += [
             'name' => 'opis',
             'flashslot' => 'opis:flashdata',
             'lifetime' => ini_get('session.cookie_lifetime'),
@@ -57,32 +56,20 @@ class Session
             'path' => ini_get('session.cookie_path'),
             'secure' => ini_get('session.cookie_secure'),
             'httponly' => ini_get('session.cookie_httponly'),
-        );
+        ];
         
+        $this->storage = $storage;
         $this->config = $config;
+        $this->flashslot = $config['flashslot'];
         
-        if($storage !== null)
-        {
-            session_set_save_handler
-            (
-                array($storage, 'open'),
-                array($storage, 'close'),
-                array($storage, 'read'),
-                array($storage, 'write'),
-                array($storage, 'destroy'),
-                array($storage, 'gc')
-            );
-        }
-        
-        $this->flashslot = $this->config['flashslot'];
-        session_name($this->config['name']);
-        
+        session_set_save_handler($storage);
+        session_name($config['name']);
         session_set_cookie_params(
-            $this->config['lifetime'],
-            $this->config['path'],
-            $this->config['domain'],
-            $this->config['secure'],
-            $this->config['httponly']
+            $config['lifetime'],
+            $config['path'],
+            $config['domain'],
+            $config['secure'],
+            $config['httponly']
         );
         
         session_start();
@@ -90,8 +77,6 @@ class Session
     
     /**
      * Destructor
-     *
-     * @access  public
      */
     
     public function __destruct()
@@ -104,13 +89,11 @@ class Session
     /**
      * Stores a value in the session.
      *
-     * @access  public
-     * 
      * @param   string  $key    Session key
      * @param   mixed   $value  Session data
      */
     
-    public function set($key, $value)
+    public function set(string $key, $value)
     {
         $_SESSION[$key] = $value;
     }
@@ -118,12 +101,10 @@ class Session
     /**
      * Removes a value from the session.
      *
-     * @access  public
-     * 
      * @param   string  $key    Session key
      */
     
-    public function delete($key)
+    public function delete(string $key)
     {
         unset($_SESSION[$key]);
     }
@@ -131,22 +112,17 @@ class Session
     /**
      * Checks if the key was set.
      *
-     * @access  public
-     * 
      * @param   string  $key    Session key
-     * 
      * @return  boolean
      */
     
-    public function has($key)
+    public function has(string $key)
     {
         return isset($_SESSION[$key]);
     }
     
     /**
      * Returns a value from the session.
-     *
-     * @access  public
      * 
      * @param   string  $key        Session key
      * @param   mixed   $default    (optional) Default value
@@ -154,7 +130,7 @@ class Session
      * @return mixed
      */
     
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
         return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
     }
@@ -162,19 +138,16 @@ class Session
     /**
      * Gets a value from session if the key exists, otherwise associate
      * the specified key with the value returned by invoking the callback.
-     *
-     * @access  public
      * 
      * @param   string      $key        Session key
-     * @param   \Closure    $callback   Callback function
+     * @param   callable    $callback   Callback function
      * 
      * @return mixed
      */
     
-    public function load($key, Closure $callback)
+    public function load(string $key, callable $callback)
     {
-        if(!$this->has($key))
-        {
+        if(!$this->has($key)) {
             $this->set($key, $callback($key));
         }
         
@@ -184,41 +157,35 @@ class Session
     /**
      * Access flash object.
      *
-     * @access  public
-     * 
-     * @return  \Opis\Session\Flash
+     * @return  Flash
      */
         
-    public function flash()
+    public function flash(): Flash
     {
-        if($this->flashdata === null)
-        {
+        if($this->flashdata === null) {
             $this->flashdata = new Flash(isset($_SESSION[$this->flashslot]) ? $_SESSION[$this->flashslot] : array());
         }
         
         return $this->flashdata;
     }
-    
+
     /**
      * Extends the lifetime of the flash data by one request.
      *
-     * @access  public
-     * 
-     * @param   array   $keys   (optional) Keys to preserve
+     * @param array $keys (optional) Keys to preserve
+     * @return Flash
      */
     
-    public function reflash(array $keys = array())
+    public function reflash(array $keys = []): Flash
     {
         return $this->flash()->reflash($keys);
     }
     
     /**
      * Clears all session data.
-     *
-     * @access  public
      */
         
-    public function clear()
+    public function clear() 
     {
         $_SESSION = array();
     }
@@ -226,12 +193,10 @@ class Session
     /**
      * Returns the session id.
      *
-     * @access  public
-     * 
      * @return  string
      */
     
-    public function id()
+    public function id(): string 
     {
         return session_id();
     }
@@ -239,27 +204,22 @@ class Session
     /**
      * Regenerates the session id.
      *
-     * @access  public
-     * 
      * @param   boolean $keep  (optional) Delete old data associated with the old ID
-     * 
      * @return  boolean
      */
         
-    public function regenerate($kepp = false)
+    public function regenerate(bool $keep = false): bool 
     {
-        return session_regenerate_id(!$kepp);
+        return session_regenerate_id(!$keep);
     }
     
     /**
      * Destroys all data registered to the session.
-     *
-     * @access  public
      * 
      * @return  boolean
      */
     
-    public function destroy()
+    public function destroy(): bool 
     {
         return session_destroy();
     }
