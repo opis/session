@@ -15,7 +15,7 @@
  * limitations under the License.
  * ============================================================================ */
 
-namespace Opis\Session\Stores;
+namespace Opis\Session\Handlers;
 
 use SessionHandlerInterface;
 
