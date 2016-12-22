@@ -9,6 +9,7 @@ CHANGELOG
 * Renamed `Opis\Session\Storage` namespace to `Opis\Session\Handlers`
 * Removed deprecated methods from `Opis\Session\Session`
 * The `SessionHandlerInterface` argument is no longer optional in `Opis\Session\Session` class
+* Source files were moved from `lib` to `src`
 
 
 ### v3.1.0, 2015.09.22
