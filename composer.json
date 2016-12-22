@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Opis\\Session\\": "lib/"
+            "Opis\\Session\\": "src/"
         }
     },
     "extra": {
