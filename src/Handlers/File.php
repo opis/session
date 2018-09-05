@@ -24,12 +24,16 @@ class File implements SessionHandlerInterface
     /** @var string */
     protected $path;
 
+    /** @var int */
+    protected $maxLifeTime;
+
     /**
      * @param string $path
      */
-    public function __construct(string $path)
+    public function __construct(string $path, int $maxLifeTime = 0)
     {
         $this->path = $path;
+        $this->maxLifeTime = $maxLifeTime > 0 ?: ini_get('session.gc_maxlifetime');
 
         if (!is_dir($path) && !@mkdir($path, 0777, true)) {
             throw new \RuntimeException('Session directory does not exist: "' . $path . '".');
@@ -47,7 +51,7 @@ class File implements SessionHandlerInterface
     {
         // Fixes issue with Debian and Ubuntu session garbage collection
         if (mt_rand(1, 100) === 100) {
-            $this->gc(ini_get('session.gc_maxlifetime'));
+            $this->gc($this->maxLifeTime);
         }
     }
 
