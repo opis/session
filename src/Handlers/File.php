@@ -21,153 +21,102 @@ use SessionHandlerInterface;
 
 class File implements SessionHandlerInterface
 {
-    /** @var    string  Path. */
+    /** @var string */
     protected $path;
-    
+
     /**
-     * Constructor
-     *
-     * @access  public
-     * 
-     * @param   string  $path   Folder path.
+     * @param string $path
      */
-    
-    public function __construct($path)
+    public function __construct(string $path)
     {
         $this->path = $path;
-        
+
         if (!is_dir($path) && !@mkdir($path, 0777, true)) {
             throw new \RuntimeException('Session directory does not exist: "' . $path . '".');
-        } 
+        }
+
         if (!is_writable($path)) {
             throw new \RuntimeException('Session directory is not writable: "' . $path . '".');
         }
     }
-    
-    /**
-     * Destructor.
-     *
-     * @access  public
-     */
 
+    /**
+     * Destructor
+     */
     public function __destruct()
-    {   
+    {
         // Fixes issue with Debian and Ubuntu session garbage collection
-        if(mt_rand(1, 100) === 100)
-        {
+        if (mt_rand(1, 100) === 100) {
             $this->gc(ini_get('session.gc_maxlifetime'));
         }
     }
 
     /**
-     * Open session.
-     *
-     * @access  public
-     * 
-     * @param   string  $savePath       Save path
-     * @param   string  $sessionName    Session name
-     * 
-     * @return  boolean
+     * @inheritdoc
      */
-
     public function open($savePath, $sessionName)
     {
         return true;
     }
 
     /**
-     * Close session.
-     *
-     * @access  public
-     * 
-     * @return  boolean
+     * @inheritdoc
      */
-
     public function close()
     {
         return true;
     }
 
     /**
-     * Returns session data.
-     *
-     * @access  public
-     * 
-     * @param   string  $id Session id
-     * 
-     * @return  string
+     * @inheritdoc
      */
-
     public function read($id)
     {
         $data = '';
-        if(file_exists($this->path . '/' . $id) && is_readable($this->path . '/' . $id))
-        {
-            $data = (string) file_get_contents($this->path . '/' . $id);
+        if (file_exists($this->path . '/' . $id) && is_readable($this->path . '/' . $id)) {
+            $data = (string)file_get_contents($this->path . '/' . $id);
         }
         return $data;
     }
 
     /**
-     * Writes data to the session.
-     *
-     * @access  public
-     * @param   string  $id    Session id
-     * @param   string  $data  Session data
+     * @inheritdoc
      */
-
     public function write($id, $data)
     {
-        if(is_writable($this->path))
-        {
+        if (is_writable($this->path)) {
             return file_put_contents($this->path . '/' . $id, $data) === false ? false : true;
         }
         return false;
     }
 
     /**
-     * Destroys the session.
-     *
-     * @access  public
-     * @param   string   $id  Session id
-     * @return  boolean
+     * @inheritdoc
      */
-
     public function destroy($id)
     {
-        if(file_exists($this->path . '/' . $id) && is_writable($this->path . '/' . $id))
-        {
+        if (file_exists($this->path . '/' . $id) && is_writable($this->path . '/' . $id)) {
             return unlink($this->path . '/' . $id);
         }
         return false;
     }
 
     /**
-     * Garbage collector.
-     *
-     * @access  public
-     * 
-     * @param   int     $maxLifetime  Lifetime in secods
-     * 
-     * @return  boolean
+     * @inheritdoc
      */
-
     public function gc($maxLifetime)
     {
         $files = glob($this->path . '/*');
-        
-        if(is_array($files))
-        {
-            foreach($files as $file)
-            {
-                if((filemtime($file) + $maxLifetime) < time() && is_writable($file))
-                {
+
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                if ((filemtime($file) + $maxLifetime) < time() && is_writable($file)) {
                     unlink($file);
                 }
             }
         }
-        
+
         return true;
     }
-    
+
 }
