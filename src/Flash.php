@@ -19,12 +19,15 @@ namespace Opis\Session;
 
 class Flash
 {
-    /** @var array  */
-    protected $data = array();
+    /** @var array */
+    protected $data = [];
 
     /** @var array */
     protected $session;
-    
+
+    /**
+     * @param array $session
+     */
     public function __construct(array $session = [])
     {
         $this->session = $session;
@@ -44,32 +47,31 @@ class Flash
     }
     
     /**
-     * Retrieve a value
+     * Read a value
      *
-     * @param   string  $key        Key
-     * @param   mixed   $default    (optional)  Default value
+     * @param string $key Key
+     * @param mixed|null $default Default value
      * 
      * @return  mixed
      */
     public function get(string $key, $default = null)
     {
-        if(isset($this->data[$key])) {
+        if (array_key_exists($key, $this->data)) {
             return $this->data[$key];
         }
-        
-        return $this->session[$key] ?? $default;
+
+        return array_key_exists($key, $this->session) ? $this->session[$key] : $default;
     }
     
     /**
-     * Retrieve the value associated with the specified key or associate
+     * Read the value associated with the specified key or associate
      * the specified key with the value returned by invoking the callback.
      *
-     * @param   string      $key        Key
-     * @param   callable    $callback   Callback
+     * @param string $key Key
+     * @param callable $callback Callback
      *
-     * @return  mixed
+     * @return mixed
      */
-    
     public function load(string $key, callable $callback)
     {
         if(!$this->has($key)) {
@@ -80,12 +82,12 @@ class Flash
     }
     
     /**
-     * Removes specified key
+     * Remove specified key
      *
+     * @param string $key Key
      * @return  Flash
      */
-    
-    public function delete($key): self
+    public function delete(string $key): self
     {
         unset($this->data[$key]);
         return $this;
@@ -94,24 +96,21 @@ class Flash
     /**
      * Check if a key exists
      *
-     * @return  boolean
+     * @param string $key Key
+     * @return boolean
      */
-    
-    public function has($key): bool
+    public function has(string $key): bool
     {
-        return isset($this->data[$key]) || isset($this->session[$key]);
+        return array_key_exists($key, $this->data) || array_key_exists($key, $this->session[$key]);
     }
     
     /**
      * Clear or replace data
-     * 
-     * @access  public
      *
-     * @param   array   $data   (optional) Data
+     * @param array $data Data
      * 
-     * @return  Flash
+     * @return Flash
      */
-    
     public function clear(array $data = []): self
     {
         $this->data = $data;
@@ -120,13 +119,12 @@ class Flash
     }
     
     /**
-     * Reflash data
+     * Re-flash data
      *
-     * @param   array   $keys   (optional) Data
+     * @param array $keys Data
      * 
-     * @return  Flash
+     * @return Flash
      */
-    
     public function reflash(array $keys = []): self
     {
         $data = empty($keys) ? $this->session : array_intersect_key($this->session, array_flip($keys));
@@ -136,9 +134,8 @@ class Flash
     /**
      * Return saved data
      *
-     * @return  array
+     * @return array
      */
-    
     public function toArray(): array
     {
         return $this->data;
