@@ -33,7 +33,7 @@ class File implements SessionHandlerInterface
     public function __construct(string $path, int $maxLifeTime = 0)
     {
         $this->path = $path;
-        $this->maxLifeTime = $maxLifeTime > 0 ?: ini_get('session.gc_maxlifetime');
+        $this->maxLifeTime = $maxLifeTime > 0 ? $maxLifeTime : ini_get('session.gc_maxlifetime');
 
         if (!is_dir($path) && !@mkdir($path, 0777, true)) {
             throw new \RuntimeException('Session directory does not exist: "' . $path . '".');
