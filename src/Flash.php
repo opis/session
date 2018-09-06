@@ -62,6 +62,29 @@ class Flash
 
         return array_key_exists($key, $this->session) ? $this->session[$key] : $default;
     }
+
+    /**
+     * Check if a key exists
+     *
+     * @param string $key Key
+     * @return boolean
+     */
+    public function has(string $key): bool
+    {
+        return array_key_exists($key, $this->data) || array_key_exists($key, $this->session);
+    }
+
+    /**
+     * Remove specified key
+     *
+     * @param string $key Key
+     * @return  Flash
+     */
+    public function delete(string $key): self
+    {
+        unset($this->data[$key]);
+        return $this;
+    }
     
     /**
      * Read the value associated with the specified key or associate
@@ -79,29 +102,6 @@ class Flash
         }
         
         return $this->get($key);
-    }
-    
-    /**
-     * Remove specified key
-     *
-     * @param string $key Key
-     * @return  Flash
-     */
-    public function delete(string $key): self
-    {
-        unset($this->data[$key]);
-        return $this;
-    }
-    
-    /**
-     * Check if a key exists
-     *
-     * @param string $key Key
-     * @return boolean
-     */
-    public function has(string $key): bool
-    {
-        return array_key_exists($key, $this->data) || array_key_exists($key, $this->session[$key]);
     }
     
     /**
