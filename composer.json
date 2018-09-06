@@ -2,20 +2,32 @@
     "name": "opis/session",
     "description": "Opis Session is a session manager library with support for multiple backend stores",
     "keywords": ["opis", "session", "session store", "session management"],
-    "homepage": "http://www.opis.io/session",
+    "homepage": "https://opis.io/session",
     "license": "Apache-2.0",
     "authors": [
         {
             "name": "Marius Sarca",
             "email": "marius.sarca@gmail.com"
+        },
+        {
+            "name": "Sorin Sarca",
+            "email": "sarca_sorin@hotmail.com"
         }
     ],
     "require": {
-        "php": ">=7.0.0"
+        "php": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
     },
     "autoload": {
         "psr-4": {
             "Opis\\Session\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Opis\\Session\\Test\\": "tests/"
         }
     },
     "extra": {
