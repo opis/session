@@ -4,12 +4,7 @@ CHANGELOG
 
 * Removed support for PHP 5.x
 * Added support for PHP 7
-* Removed `SessionHandlerInterface` interface
-* Removed MongoDB support
-* Renamed `Opis\Session\Storage` namespace to `Opis\Session\Handlers`
-* Removed deprecated methods from `Opis\Session\Session`
-* The `SessionHandlerInterface` argument is no longer optional in `Opis\Session\Session` class
-* Source files were moved from `lib` to `src`
+* The library was fully refactored
 
 
 ### v3.1.0, 2015.09.22
