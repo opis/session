@@ -77,7 +77,9 @@ class SessionTest extends TestCase
     public function testFlashMethod()
     {
         $session = new Session();
-        $this->assertInstanceOf(Flash::class, $session->flash());
+        $flash = $session->flash();
+        $this->assertInstanceOf(Flash::class, $flash);
+        $this->assertSame($flash, $session->flash());
     }
 
     public function testClearMethod()
