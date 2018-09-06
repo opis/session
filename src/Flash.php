@@ -122,18 +122,18 @@ class Flash
     /**
      * Re-flash data
      *
-     * @param array $keys Data
+     * @param array|null $keys Data
      *
      * @return Flash
      */
-    public function reflash(array $keys = []): self
+    public function reflash(array $keys = null): self
     {
-        if (empty($keys)) {
-            return $this->clear();
+        if ($keys === null) {
+            return $this->clear($this->data + $this->session);
         }
 
-        $data = $this->data + $this->session;
-        return $this->clear(array_intersect_key($data, array_flip($keys)));
+        $session = array_intersect_key($this->session, array_flip($keys));
+        return $this->clear($this->data + $session);
     }
 
     /**
