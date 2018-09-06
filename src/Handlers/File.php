@@ -29,6 +29,7 @@ class File implements SessionHandlerInterface
 
     /**
      * @param string $path
+     * @param int $maxLifeTime
      */
     public function __construct(string $path, int $maxLifeTime = 0)
     {
