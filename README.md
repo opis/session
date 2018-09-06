@@ -1,5 +1,6 @@
 Opis Session
 ============
+[![Build Status](https://travis-ci.org/opis/closure.png)](https://travis-ci.org/opis/session)
 [![Latest Stable Version](https://poser.pugx.org/opis/session/version.png)](https://packagist.org/packages/opis/session)
 [![Latest Unstable Version](https://poser.pugx.org/opis/session/v/unstable.png)](//packagist.org/packages/opis/session)
 [![License](https://poser.pugx.org/opis/session/license.png)](https://packagist.org/packages/opis/session)
@@ -11,36 +12,38 @@ developers with an API which allows them to handle session related information i
 
 The currently available handlers are: File and native store. 
 
+### Documentation
+
+The full documentation for this library can be found [here][documentation].
+
 ### License
 
-**Opis Session** is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0). 
+**Opis Session** is licensed under the [Apache License, Version 2.0][apache_license].
 
 ### Requirements
 
-* PHP 7.0.* or higher
+* PHP ^7.0
 
-### Installation
+## Installation
 
-This library is available on [Packagist](https://packagist.org/packages/opis/session) and can be installed using [Composer](http://getcomposer.org).
+**Opis Session** is available on [Packagist] and it can be installed from a 
+command line interface by using [Composer]. 
+
+```bash
+composer require opis/session
+```
+
+Or you could directly reference it into your `composer.json` file as a dependency
 
 ```json
 {
     "require": {
-        "opis/session": "^4.0.*@dev"
+        "opis/session": "^4.0"
     }
 }
 ```
 
-If you are unable to use [Composer](http://getcomposer.org) you can download the
-[tar.gz](https://github.com/opis/session/archive/master.tar.gz) or the [zip](https://github.com/opis/session/archive/master.zip)
-archive file, extract the content of the archive and include de `autoload.php` file into your project. 
-
-```php
-
-require_once 'path/to/master/autoload.php';
-
-```
-
-### Documentation
-
-Examples and documentation(outdated) can be found [here](http://opis.io/session).
+[documentation]: https://www.opis.io/session
+[apache_license]: https://www.apache.org/licenses/LICENSE-2.0 "Apache License"
+[Packagist]: https://packagist.org/packages/opis/session "Packagist"
+[Composer]: https://getcomposer.org "Composer"
