@@ -19,7 +19,7 @@ namespace Opis\Session;
 
 use SessionHandlerInterface;
 
-class Session
+class Session implements ISession
 {
     /** @var array */
     protected $config;
@@ -32,7 +32,6 @@ class Session
 
     /** @var SessionHandlerInterface */
     protected $handler;
-
 
     /**
      * @param SessionHandlerInterface $handler
@@ -78,10 +77,7 @@ class Session
     }
 
     /**
-     * Stores a value in the session.
-     *
-     * @param string $key Session key
-     * @param mixed $value Session data
+     * @inheritdoc
      */
     public function set(string $key, $value)
     {
@@ -89,9 +85,7 @@ class Session
     }
 
     /**
-     * Removes a value from the session.
-     *
-     * @param string $key Session key
+     * @inheritdoc
      */
     public function delete(string $key)
     {
@@ -99,10 +93,7 @@ class Session
     }
 
     /**
-     * Checks if the key was set.
-     *
-     * @param string $key Session key
-     * @return boolean
+     * @inheritdoc
      */
     public function has(string $key): bool
     {
@@ -110,12 +101,7 @@ class Session
     }
 
     /**
-     * Returns a value from the session.
-     *
-     * @param string $key Session key
-     * @param mixed $default (optional) Default value
-     *
-     * @return mixed|null
+     * @inheritdoc
      */
     public function get(string $key, $default = null)
     {
@@ -123,13 +109,7 @@ class Session
     }
 
     /**
-     * Gets a value from session if the key exists, otherwise associate
-     * the specified key with the value returned by invoking the callback.
-     *
-     * @param string $key Session key
-     * @param callable $callback Callback function
-     *
-     * @return mixed|null
+     * @inheritdoc
      */
     public function load(string $key, callable $callback)
     {
@@ -141,9 +121,7 @@ class Session
     }
 
     /**
-     * Access flash object.
-     *
-     * @return Flash
+     * @inheritdoc
      */
     public function flash(): Flash
     {
@@ -155,7 +133,7 @@ class Session
     }
 
     /**
-     * Clears all session data.
+     * @inheritdoc
      */
     public function clear()
     {
@@ -163,9 +141,7 @@ class Session
     }
 
     /**
-     * Returns the session id.
-     *
-     * @return string
+     * @inheritdoc
      */
     public function id(): string
     {
@@ -173,10 +149,7 @@ class Session
     }
 
     /**
-     * Regenerates the session id.
-     *
-     * @param boolean $keep (optional) Delete old data associated with the old ID
-     * @return boolean
+     * @inheritdoc
      */
     public function regenerate(bool $keep = false): bool
     {
@@ -184,9 +157,7 @@ class Session
     }
 
     /**
-     * Destroys all data registered to the session.
-     *
-     * @return boolean
+     * @inheritdoc
      */
     public function destroy(): bool
     {
