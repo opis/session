@@ -45,13 +45,13 @@ class Flash
         $this->data[$key] = $value;
         return $this;
     }
-    
+
     /**
      * Read a value
      *
      * @param string $key Key
      * @param mixed|null $default Default value
-     * 
+     *
      * @return  mixed
      */
     public function get(string $key, $default = null)
@@ -85,7 +85,7 @@ class Flash
         unset($this->data[$key]);
         return $this;
     }
-    
+
     /**
      * Read the value associated with the specified key or associate
      * the specified key with the value returned by invoking the callback.
@@ -97,18 +97,18 @@ class Flash
      */
     public function load(string $key, callable $callback)
     {
-        if(!$this->has($key)) {
+        if (!$this->has($key)) {
             $this->set($key, $callback($key));
         }
-        
+
         return $this->get($key);
     }
-    
+
     /**
      * Clear or replace data
      *
      * @param array $data Data
-     * 
+     *
      * @return Flash
      */
     public function clear(array $data = []): self
@@ -117,12 +117,12 @@ class Flash
         $this->session = [];
         return $this;
     }
-    
+
     /**
      * Re-flash data
      *
      * @param array $keys Data
-     * 
+     *
      * @return Flash
      */
     public function reflash(array $keys = []): self
@@ -130,7 +130,7 @@ class Flash
         $data = empty($keys) ? $this->session : array_intersect_key($this->session, array_flip($keys));
         return $this->clear($data);
     }
-    
+
     /**
      * Return saved data
      *
