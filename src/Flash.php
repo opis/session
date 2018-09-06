@@ -83,6 +83,7 @@ class Flash
     public function delete(string $key): self
     {
         unset($this->data[$key]);
+        unset($this->session[$key]);
         return $this;
     }
 
@@ -127,8 +128,12 @@ class Flash
      */
     public function reflash(array $keys = []): self
     {
-        $data = empty($keys) ? $this->session : array_intersect_key($this->session, array_flip($keys));
-        return $this->clear($data);
+        if (empty($keys)) {
+            return $this->clear();
+        }
+
+        $data = $this->data + $this->session;
+        return $this->clear(array_intersect_key($data, array_flip($keys)));
     }
 
     /**
