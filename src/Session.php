@@ -55,7 +55,7 @@ class Session
             'cookie_path' => '/',
             'cookie_domain' => '',
             'cookie_secure' => false,
-            'cookie_httponly' => false,
+            'cookie_http_only' => false,
         ];
 
         $session = null;

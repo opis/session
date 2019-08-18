@@ -34,7 +34,7 @@ interface ICookieContainer
     /**
      * @param string $name
      * @param string $value
-     * @param int $expires
+     * @param int $expire
      * @param string $path
      * @param string $domain
      * @param bool $secure
@@ -44,7 +44,7 @@ interface ICookieContainer
     public function setCookie(
         string $name,
         string $value,
-        int $expires = 0,
+        int $expire = 0,
         string $path = "",
         string $domain = "",
         bool $secure = false,
