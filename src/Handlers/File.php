@@ -60,10 +60,12 @@ class File implements ISessionHandler
      */
     public function open(string $name)
     {
-        $this->filename = $this->path . DIRECTORY_SEPARATOR . $name . '.session';
+        $this->filename = $this->getHeaderFilename($this->path, $name);
+
         if (!file_exists($this->filename)) {
             file_put_contents($this->filename, $this->serializeHeaderData([]));
         }
+
         $this->fp = fopen($this->filename, 'c+');
     }
 
@@ -107,7 +109,7 @@ class File implements ISessionHandler
      */
     public function read(string $session_id): ?SessionData
     {
-        $file = $this->path . DIRECTORY_SEPARATOR . $session_id;
+        $file = $this->getSessionDataFilename($this->path, $session_id);
 
         if (!file_exists($file)) {
             return null;
@@ -124,8 +126,13 @@ class File implements ISessionHandler
         flock($this->fp, LOCK_EX);
         fseek($this->fp, 0);
 
-        $filesize = filesize($this->filename);
-        $tmp = $this->unserializeHeaderData(fread($this->fp, $filesize));
+        $content = '';
+
+        while (!feof($this->fp)) {
+            $content .= fread($this->fp, 1024);
+        }
+
+        $tmp = $this->unserializeHeaderData($content);
         $timestamp = time();
 
         $data = [];
@@ -133,14 +140,18 @@ class File implements ISessionHandler
         foreach ($tmp as $key => $expire) {
             if ($expire > $timestamp) {
                 $data[$key] = $expire;
+            } else {
+                unlink($this->getSessionDataFilename($this->path, $key));
             }
         }
 
         unset($tmp);
 
+        $content = $this->serializeHeaderData($data);
+
         fseek($this->fp, 0);
-        ftruncate($this->fp, $filesize);
-        fwrite($this->fp, $this->serializeHeaderData($data));
+        ftruncate($this->fp, strlen($content));
+        fwrite($this->fp, $content);
 
         return flock($this->fp, LOCK_UN);
     }
@@ -191,6 +202,26 @@ class File implements ISessionHandler
     }
 
     /**
+     * @param string $path
+     * @param string $name
+     * @return string
+     */
+    protected function getHeaderFilename(string $path, string $name): string
+    {
+        return $path . DIRECTORY_SEPARATOR . $name . '.session';
+    }
+
+    /**
+     * @param string $path
+     * @param string $session_id
+     * @return string
+     */
+    protected function getSessionDataFilename(string $path, string $session_id): string
+    {
+        return $path . DIRECTORY_SEPARATOR . $session_id;
+    }
+
+    /**
      * @param SessionData $session
      * @param bool $remove
      * @return bool
@@ -198,16 +229,20 @@ class File implements ISessionHandler
     private function updateSession(SessionData $session, bool $remove = false): bool
     {
         $session_id = $session->id();
-        $file = $this->path . DIRECTORY_SEPARATOR . $session_id;
+        $file = $this->getSessionDataFilename($this->path, $session_id);
 
         flock($this->fp, LOCK_EX);
 
         fseek($this->fp, 0);
 
         $mustWrite = false;
-        $filesize = filesize($this->filename);
+        $content = '';
 
-        $data = $this->unserializeHeaderData(fread($this->fp, $filesize));
+        while (!feof($this->fp)) {
+            $content .= fread($this->fp, 1024);
+        }
+
+        $data = $this->unserializeHeaderData($content);
 
         if ($remove) {
             unlink($file);
@@ -222,9 +257,10 @@ class File implements ISessionHandler
         }
 
         if ($mustWrite) {
+            $content = $this->serializeHeaderData($data);
             fseek($this->fp, 0);
-            ftruncate($this->fp, $filesize);
-            fwrite($this->fp, $this->serializeHeaderData($data));
+            ftruncate($this->fp, strlen($content));
+            fwrite($this->fp, $content);
         }
 
         return flock($this->fp, LOCK_UN);
