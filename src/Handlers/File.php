@@ -17,10 +17,11 @@
 
 namespace Opis\Session\Handlers;
 
+use RuntimeException;
 use Opis\Session\ISessionHandler;
 use Opis\Session\SessionData;
 
-class DefaultHandler implements ISessionHandler
+class File implements ISessionHandler
 {
     /** @var string */
     private $path;
@@ -37,6 +38,20 @@ class DefaultHandler implements ISessionHandler
      */
     public function __construct(string $path)
     {
+        if (!file_exists($path)) {
+            if (!@mkdir($path, 0775, true)) {
+                throw new RuntimeException('Could not create path');
+            }
+        }
+
+        if (!is_dir($path)) {
+            throw new RuntimeException('Path must be a directory');
+        }
+
+        if (!is_writable($path)) {
+            throw new RuntimeException('Path must be writable');
+        }
+
         $this->path = $path;
     }
 
@@ -47,7 +62,7 @@ class DefaultHandler implements ISessionHandler
     {
         $this->filename = $this->path . DIRECTORY_SEPARATOR . $name . '.session';
         if (!file_exists($this->filename)) {
-            file_put_contents($this->filename, serialize([]));
+            file_put_contents($this->filename, $this->serializeHeaderData([]));
         }
         $this->fp = fopen($this->filename, 'c+');
     }
@@ -98,9 +113,7 @@ class DefaultHandler implements ISessionHandler
             return null;
         }
 
-        $data = @unserialize(file_get_contents($file));
-
-        return $data instanceof SessionData ? $data : null;
+        return $this->unserializeSessionData(file_get_contents($file));
     }
 
     /**
@@ -112,7 +125,7 @@ class DefaultHandler implements ISessionHandler
         fseek($this->fp, 0);
 
         $filesize = filesize($this->filename);
-        $tmp = unserialize(fread($this->fp, $filesize));
+        $tmp = $this->unserializeHeaderData(fread($this->fp, $filesize));
         $timestamp = time();
 
         $data = [];
@@ -127,7 +140,7 @@ class DefaultHandler implements ISessionHandler
 
         fseek($this->fp, 0);
         ftruncate($this->fp, $filesize);
-        fwrite($this->fp, serialize($data));
+        fwrite($this->fp, $this->serializeHeaderData($data));
 
         return flock($this->fp, LOCK_UN);
     }
@@ -138,6 +151,43 @@ class DefaultHandler implements ISessionHandler
     public function generateSessionId(): string
     {
         return session_create_id();
+    }
+
+    /**
+     * @param SessionData $session
+     * @return string
+     */
+    protected function serializeSessionData(SessionData $session): string
+    {
+        return serialize($session);
+    }
+
+    /**
+     * @param string $data
+     * @return SessionData|null
+     */
+    protected function unserializeSessionData(string $data): ?SessionData
+    {
+        $data = @unserialize($data);
+        return $data instanceof SessionData ? $data : null;
+    }
+
+    /**
+     * @param array $data
+     * @return string
+     */
+    protected function serializeHeaderData(array $data): string
+    {
+        return serialize($data);
+    }
+
+    /**
+     * @param string $data
+     * @return array
+     */
+    protected function unserializeHeaderData(string $data): array
+    {
+        return unserialize($data);
     }
 
     /**
@@ -157,14 +207,14 @@ class DefaultHandler implements ISessionHandler
         $mustWrite = false;
         $filesize = filesize($this->filename);
 
-        $data = unserialize(fread($this->fp, $filesize));
+        $data = $this->unserializeHeaderData(fread($this->fp, $filesize));
 
         if ($remove) {
             unlink($file);
             unset($data[$session_id]);
             $mustWrite = true;
         } else {
-            file_put_contents($file, serialize($session));
+            file_put_contents($file, $this->serializeSessionData($session));
             if (!isset($data[$session_id]) || $data[$session_id] !== $session->expiresAt()) {
                 $data[$session_id] = $session->expiresAt();
                 $mustWrite = true;
@@ -174,7 +224,7 @@ class DefaultHandler implements ISessionHandler
         if ($mustWrite) {
             fseek($this->fp, 0);
             ftruncate($this->fp, $filesize);
-            fwrite($this->fp, serialize($data));
+            fwrite($this->fp, $this->serializeHeaderData($data));
         }
 
         return flock($this->fp, LOCK_UN);
