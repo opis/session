@@ -58,7 +58,7 @@ class CookieContainer implements ICookieContainer
         bool $secure = false,
         bool $http_only = false
     ): bool {
-        $this->newCookies[$name] = [$value, $expires, $path, $domain, $secure, $http_only];
+        $this->cookies[$name] = $value;
         return true;
     }
 }
