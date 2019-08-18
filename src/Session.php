@@ -40,12 +40,16 @@ class Session
     /**
      * Session constructor.
      *
-     * @param ICookieContainer $container
      * @param ISessionHandler $handler
      * @param array $config
+     * @param ICookieContainer|null $container
      */
-    public function __construct(ICookieContainer $container, ISessionHandler $handler, array $config = [])
+    public function __construct(ISessionHandler $handler, array $config = [], ICookieContainer $container = null)
     {
+        if ($container === null) {
+            $container = new NativeCookieContainer();
+        }
+
         $config += [
             'flash_slot' => '__flash__',
             'gc_probability' => 1,
