@@ -47,7 +47,7 @@ class Session
     public function __construct(ISessionHandler $handler, array $config = [], ICookieContainer $container = null)
     {
         if ($container === null) {
-            $container = new NativeCookieContainer();
+            $container = new CookieContainer();
         }
 
         $config += [

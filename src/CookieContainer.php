@@ -17,7 +17,7 @@
 
 namespace Opis\Session;
 
-class NativeCookieContainer implements ICookieContainer
+class CookieContainer implements ICookieContainer
 {
     /**
      * @inheritDoc
