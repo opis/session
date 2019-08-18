@@ -17,6 +17,7 @@
 
 namespace Opis\Session\Test;
 
+use Opis\Session\Handlers\File;
 use Opis\Session\ISessionHandler;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +28,7 @@ class HandlerTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        static::$handler = $h = new JSONHandler();
+        static::$handler = $h = new File(__DIR__ . DIRECTORY_SEPARATOR . 'sessions');
         $h->open('PHPSESSIONID');
     }
 
