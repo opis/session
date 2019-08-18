@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2018 Zindex Software
+ * Copyright 2019 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,53 +17,84 @@
 
 namespace Opis\Session;
 
-use SessionHandlerInterface;
-
-class Session implements ISession
+class Session
 {
     /** @var array */
-    protected $config;
+    private $config;
 
-    /** @var Flash */
-    protected $flashdata;
+    /** @var ISessionHandler */
+    private $handler;
 
-    /** @var string */
-    protected $flashslot;
+    /** @var ICookieContainer */
+    private $container;
 
-    /** @var SessionHandlerInterface */
-    protected $handler;
+    /** @var array */
+    private $data;
+
+    /** @var Flash|null */
+    private $flash;
+
+    /** @var SessionData */
+    private $session;
 
     /**
-     * @param SessionHandlerInterface $handler
+     * Session constructor.
+     *
+     * @param ICookieContainer $container
+     * @param ISessionHandler $handler
      * @param array $config
      */
-    public function __construct(SessionHandlerInterface $handler, array $config = [])
+    public function __construct(ICookieContainer $container, ISessionHandler $handler, array $config = [])
     {
         $config += [
-            'name' => 'opis',
-            'flashslot' => 'opis:flashdata',
-            'lifetime' => ini_get('session.cookie_lifetime'),
-            'domain' => ini_get('session.cookie_domain'),
-            'path' => ini_get('session.cookie_path'),
-            'secure' => ini_get('session.cookie_secure'),
-            'httponly' => ini_get('session.cookie_httponly'),
+            'flash_slot' => '__flash__',
+            'gc_probability' => 1,
+            'gc_divisor' => 100,
+            'cookie_name' => 'PHPSESSIONID',
+            'cookie_lifetime' => 3600,
+            'cookie_path' => '/',
+            'cookie_domain' => '',
+            'cookie_secure' => false,
+            'cookie_httponly' => false,
         ];
 
-        $this->handler = $handler;
+        $session = null;
+        $handler->open($config['cookie_name']);
+
+        if ($container->hasCookie($config['cookie_name'])) {
+            $session = $handler->read($container->getCookie($config['cookie_name']));
+        }
+
+        if ($session === null) {
+            $session_id = $handler->generateSessionId();
+            $expire = time() + $config['cookie_lifetime'];
+            $container->setCookie(
+                $config['cookie_name'],
+                $session_id,
+                $expire,
+                $config['cookie_path'],
+                $config['cookie_domain'],
+                $config['cookie_secure'],
+                $config['cookie_httponly']
+            );
+            $session = $handler->create($session_id, $expire);
+        }
+
+        $this->data = $session->data();
+        $this->session = $session;
         $this->config = $config;
-        $this->flashslot = $config['flashslot'];
+        $this->handler = $handler;
+        $this->container = $container;
 
-        session_set_save_handler($handler, false);
-        session_name($config['name']);
-        session_set_cookie_params(
-            $config['lifetime'],
-            $config['path'],
-            $config['domain'],
-            $config['secure'],
-            $config['httponly']
-        );
-
-        session_start();
+        // GC
+        try {
+            $r = random_int(1, $config['gc_divisor']);
+        } catch (\Exception $e) {
+            $r = rand(1, $config['gc_divisor']);
+        }
+        if ($r <= $config['gc_probability']) {
+            $handler->gc();
+        }
     }
 
     /**
@@ -71,45 +102,132 @@ class Session implements ISession
      */
     public function __destruct()
     {
-        unset($_SESSION[$this->flashslot]);
-        $_SESSION[$this->flashslot] = $this->flash()->toArray();
-        session_write_close();
+        if ($this->session !== null) {
+            $this->data[$this->config['flash_slot']] = $this->flash()->toArray();
+            $this->session->setData($this->data);
+            $this->handler->update($this->session);
+        }
+
+        $this->handler->close();
     }
 
     /**
-     * @inheritdoc
+     * Returns the session id.
+     *
+     * @return string
      */
-    public function set(string $key, $value)
+    public function id(): string
     {
-        $_SESSION[$key] = $value;
+        return $this->session->id();
     }
 
     /**
-     * @inheritdoc
+     * Returns a timestamp representing the session's creation date.
+     *
+     * @return int
      */
-    public function delete(string $key)
+    public function createdAt(): int
     {
-        unset($_SESSION[$key]);
+        return $this->session->createdAt();
     }
 
     /**
-     * @inheritdoc
+     * Returns a timestamp representing the last time this session was accessed.
+     *
+     * @return int
      */
-    public function has(string $key): bool
+    public function updatedAt(): int
     {
-        return array_key_exists($key, $_SESSION);
+        return $this->session->updatedAt();
     }
 
     /**
-     * @inheritdoc
+     * Returns a timestamp representing the expiration date of the current session.
+     *
+     * @return int
+     */
+    public function expiresAt(): int
+    {
+        return $this->session->expiresAt();
+    }
+
+    /**
+     * Extends the lifetime of the session.
+     *
+     * @param int $seconds
+     * @return bool
+     */
+    public function extendLifetime(int $seconds): bool
+    {
+        if ($this->session === null || $seconds < 0) {
+            return false;
+        }
+
+        $config = $this->config;
+        $expire = $this->session->expiresAt() + $seconds;
+
+        $this->container->setCookie(
+            $config['cookie_name'],
+            $this->session->id(),
+            $expire,
+            $config['cookie_path'],
+            $config['cookie_domain'],
+            $config['cookie_secure'],
+            $config['cookie_httponly']
+        );
+
+        $this->session->setExpirationDate($expire);
+
+        return true;
+    }
+
+    /**
+     * Returns a value from the session.
+     *
+     * @param string $key Session key
+     * @param mixed|null $default (optional) Default value
+     *
+     * @return mixed|null
      */
     public function get(string $key, $default = null)
     {
-        return $_SESSION[$key] ?? $default;
+        if (array_key_exists($key, $this->data)) {
+            return $this->data[$key];
+        }
+
+        return $default;
     }
 
     /**
-     * @inheritdoc
+     * Stores a value in the session.
+     *
+     * @param string $key Session key
+     * @param mixed $value Session data
+     */
+    public function set(string $key, $value)
+    {
+        $this->data[$key] = $value;
+    }
+
+    /**
+     * Checks if the key was set.
+     *
+     * @param string $key Session key
+     * @return boolean
+     */
+    public function has(string $key): bool
+    {
+        return array_key_exists($key, $this->data);
+    }
+
+    /**
+     * Gets a value from session if the key exists, otherwise associate
+     * the specified key with the value returned by invoking the callback.
+     *
+     * @param string $key Session key
+     * @param callable $callback Callback function
+     *
+     * @return mixed|null
      */
     public function load(string $key, callable $callback)
     {
@@ -121,46 +239,102 @@ class Session implements ISession
     }
 
     /**
-     * @inheritdoc
+     * Removes a value from the session.
+     *
+     * @param string $key Session key
+     */
+    public function delete(string $key)
+    {
+        unset($this->data[$key]);
+    }
+
+    /**
+     * Access flash object.
+     *
+     * @return Flash
      */
     public function flash(): Flash
     {
-        if ($this->flashdata === null) {
-            $this->flashdata = new Flash($_SESSION[$this->flashslot] ?? []);
+        if ($this->flash === null) {
+            $this->flash = new Flash($this->data[$this->config['flash_slot']] ?? []);
         }
 
-        return $this->flashdata;
+        return $this->flash;
     }
 
     /**
-     * @inheritdoc
+     * Clears all session data.
+     *
+     * @param bool $flash
      */
-    public function clear()
+    public function clear(bool $flash = true)
     {
-        $_SESSION = [];
+        $f = $this->flash();
+        if ($flash) {
+            $f->clear();
+        }
+        $this->data = [];
     }
 
     /**
-     * @inheritdoc
-     */
-    public function id(): string
-    {
-        return session_id();
-    }
-
-    /**
-     * @inheritdoc
+     * Regenerates the session id.
+     *
+     * @param boolean $keep (optional) Keep old data associated with the old ID
+     * @return boolean
      */
     public function regenerate(bool $keep = false): bool
     {
-        return session_regenerate_id(!$keep);
+        if ($this->session === null) {
+            return false;
+        }
+
+        $session_id = $this->handler->generateSessionId();
+
+        $session = $this->handler->create($session_id, $this->session->expiresAt(), $this->session->data());
+
+        if ($session === null) {
+            return false;
+        }
+
+        if (!$keep) {
+            $this->handler->delete($this->session);
+        }
+
+        $this->session = $session;
+
+        return true;
     }
 
     /**
-     * @inheritdoc
+     * Destroys all data registered to the session and the session itself.
+     *
+     * @return boolean
      */
     public function destroy(): bool
     {
-        return session_destroy();
+        if ($this->session === null) {
+            return false;
+        }
+
+        $this->clear();
+        $config = $this->config;
+
+        if (!$this->handler->delete($this->session)) {
+            return false;
+        }
+
+        $this->session = null;
+
+        $this->container->setCookie(
+            $config['cookie_name'],
+            '',
+            1,
+            $config['cookie_path'],
+            $config['cookie_domain'],
+            $config['cookie_secure'],
+            $config['cookie_httponly']
+        );
+
+        return true;
     }
 }
