@@ -341,4 +341,14 @@ class Session
 
         return true;
     }
+
+    /**
+     * Perform garbage collect
+     *
+     * @return bool
+     */
+    public function gc(): bool
+    {
+        return $this->handler->gc();
+    }
 }
