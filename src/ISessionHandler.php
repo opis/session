@@ -54,6 +54,18 @@ interface ISessionHandler
 
     /**
      * @param string $session_id
+     * @return bool
+     */
+    public function deleteById(string $session_id): bool;
+
+    /**
+     * @param string[] $session_ids
+     * @return int
+     */
+    public function deleteMultipleById(array $session_ids): int;
+
+    /**
+     * @param string $session_id
      * @return SessionData|null
      */
     public function read(string $session_id): ?SessionData;

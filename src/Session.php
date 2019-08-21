@@ -343,12 +343,22 @@ class Session
     }
 
     /**
-     * Perform garbage collect
+     * Get the session handler object
      *
-     * @return bool
+     * @return ISessionHandler
      */
-    public function gc(): bool
+    public function getHandler(): ISessionHandler
     {
-        return $this->handler->gc();
+        return $this->handler;
+    }
+
+    /**
+     * Get the configuration for this session
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }

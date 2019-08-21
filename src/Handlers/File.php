@@ -84,7 +84,7 @@ class File implements ISessionHandler
     public function create(string $session_id, int $expire, array $data = []): SessionData
     {
         $session = new SessionData($session_id, $expire, $data);
-        $this->updateSession($session);
+        $this->createOrUpdate($session);
         return $session;
     }
 
@@ -93,7 +93,7 @@ class File implements ISessionHandler
      */
     public function update(SessionData $data): bool
     {
-        return $this->updateSession($data);
+        return $this->createOrUpdate($data);
     }
 
     /**
@@ -101,7 +101,51 @@ class File implements ISessionHandler
      */
     public function delete(SessionData $data): bool
     {
-        return $this->updateSession($data, true);
+        return $this->deleteById($data->id());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deleteById(string $session_id): bool
+    {
+        flock($this->fp, LOCK_EX);
+        fseek($this->fp, 0);
+
+        $content = '';
+
+        while (!feof($this->fp)) {
+            $content .= fread($this->fp, 1024);
+        }
+
+        $data = $this->unserializeHeaderData($content);
+        unset($data[$session_id]);
+
+        unlink($this->getSessionDataFilename($this->path, $session_id));
+
+        $content = $this->serializeHeaderData($data);
+
+        fseek($this->fp, 0);
+        ftruncate($this->fp, strlen($content));
+        fwrite($this->fp, $content);
+
+        return flock($this->fp, LOCK_UN);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deleteMultipleById(array $session_ids): int
+    {
+        $count = 0;
+
+        foreach ($session_ids as $session_id) {
+            if ($this->deleteById($session_id)) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**
@@ -223,19 +267,13 @@ class File implements ISessionHandler
 
     /**
      * @param SessionData $session
-     * @param bool $remove
      * @return bool
      */
-    private function updateSession(SessionData $session, bool $remove = false): bool
+    private function createOrUpdate(SessionData $session): bool
     {
-        $session_id = $session->id();
-        $file = $this->getSessionDataFilename($this->path, $session_id);
-
         flock($this->fp, LOCK_EX);
-
         fseek($this->fp, 0);
 
-        $mustWrite = false;
         $content = '';
 
         while (!feof($this->fp)) {
@@ -244,19 +282,12 @@ class File implements ISessionHandler
 
         $data = $this->unserializeHeaderData($content);
 
-        if ($remove) {
-            unlink($file);
-            unset($data[$session_id]);
-            $mustWrite = true;
-        } else {
-            file_put_contents($file, $this->serializeSessionData($session));
-            if (!isset($data[$session_id]) || $data[$session_id] !== $session->expiresAt()) {
-                $data[$session_id] = $session->expiresAt();
-                $mustWrite = true;
-            }
-        }
+        $session_id = $session->id();
+        $file = $this->getSessionDataFilename($this->path, $session_id);
+        file_put_contents($file, $this->serializeSessionData($session));
 
-        if ($mustWrite) {
+        if (!isset($data[$session_id]) || $data[$session_id] !== $session->expiresAt()) {
+            $data[$session_id] = $session->expiresAt();
             $content = $this->serializeHeaderData($data);
             fseek($this->fp, 0);
             ftruncate($this->fp, strlen($content));
