@@ -109,6 +109,14 @@ class File implements ISessionHandler
      */
     public function deleteById(string $session_id): bool
     {
+        return (bool) $this->deleteMultipleById([$session_id]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deleteMultipleById(array $session_ids): int
+    {
         flock($this->fp, LOCK_EX);
         fseek($this->fp, 0);
 
@@ -118,32 +126,24 @@ class File implements ISessionHandler
             $content .= fread($this->fp, 1024);
         }
 
+        $count = 0;
         $data = $this->unserializeHeaderData($content);
-        unset($data[$session_id]);
 
-        unlink($this->getSessionDataFilename($this->path, $session_id));
+        foreach ($session_ids as $session_id) {
+            if (!isset($data[$session_id])) {
+                continue;
+            }
+            unset($data[$session_id]);
+            unlink($this->getSessionDataFilename($this->path, $session_id));
+            $count++;
+        }
 
         $content = $this->serializeHeaderData($data);
 
         fseek($this->fp, 0);
         ftruncate($this->fp, strlen($content));
         fwrite($this->fp, $content);
-
-        return flock($this->fp, LOCK_UN);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function deleteMultipleById(array $session_ids): int
-    {
-        $count = 0;
-
-        foreach ($session_ids as $session_id) {
-            if ($this->deleteById($session_id)) {
-                $count++;
-            }
-        }
+        flock($this->fp, LOCK_UN);
 
         return $count;
     }
