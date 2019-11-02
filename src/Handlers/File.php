@@ -65,8 +65,6 @@ class File implements ISessionHandler
         if (!file_exists($this->filename)) {
             file_put_contents($this->filename, $this->serializeHeaderData([]));
         }
-
-        $this->fp = fopen($this->filename, 'c+');
     }
 
     /**
@@ -74,8 +72,7 @@ class File implements ISessionHandler
      */
     public function close()
     {
-        fclose($this->fp);
-        $this->fp = null;
+        $this->releaseLock();
     }
 
     /**
@@ -117,8 +114,7 @@ class File implements ISessionHandler
      */
     public function deleteMultipleById(array $session_ids): int
     {
-        flock($this->fp, LOCK_EX);
-        fseek($this->fp, 0);
+        $this->acquireLock();
 
         $content = '';
 
@@ -143,7 +139,8 @@ class File implements ISessionHandler
         fseek($this->fp, 0);
         ftruncate($this->fp, strlen($content));
         fwrite($this->fp, $content);
-        flock($this->fp, LOCK_UN);
+
+        $this->releaseLock();
 
         return $count;
     }
@@ -167,8 +164,7 @@ class File implements ISessionHandler
      */
     public function gc(): bool
     {
-        flock($this->fp, LOCK_EX);
-        fseek($this->fp, 0);
+        $this->acquireLock();
 
         $content = '';
 
@@ -197,7 +193,7 @@ class File implements ISessionHandler
         ftruncate($this->fp, strlen($content));
         fwrite($this->fp, $content);
 
-        return flock($this->fp, LOCK_UN);
+        return $this->releaseLock();
     }
 
     /**
@@ -271,8 +267,7 @@ class File implements ISessionHandler
      */
     private function createOrUpdate(SessionData $session): bool
     {
-        flock($this->fp, LOCK_EX);
-        fseek($this->fp, 0);
+        $this->acquireLock();
 
         $content = '';
 
@@ -294,6 +289,31 @@ class File implements ISessionHandler
             fwrite($this->fp, $content);
         }
 
-        return flock($this->fp, LOCK_UN);
+        return $this->releaseLock();
+    }
+
+    /**
+     * @return bool
+     */
+    private function acquireLock(): bool
+    {
+        if ($this->fp === null) {
+            $this->fp = fopen($this->filename, 'c+');
+        }
+
+        return flock($this->fp, LOCK_EX);
+    }
+
+    /**
+     * @return bool
+     */
+    private function releaseLock(): bool
+    {
+        if ($this->fp !== null) {
+            flock($this->fp, LOCK_UN);
+            fclose($this->fp);
+            $this->fp = null;
+        }
+        return true;
     }
 }
