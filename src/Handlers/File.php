@@ -156,7 +156,10 @@ class File implements ISessionHandler
             return null;
         }
 
-        return $this->unserializeSessionData(file_get_contents($file));
+        $this->acquireLock();
+        $content = $this->unserializeSessionData(file_get_contents($file));
+        $this->releaseLock();
+        return $content;
     }
 
     /**
