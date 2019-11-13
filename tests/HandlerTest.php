@@ -75,7 +75,7 @@ class HandlerTest extends TestCase
     {
         $h = static::$handler;
         $h->create('id_2', time() + 3600);
-        $h->gc();
+        $h->gc(0);
         $this->assertNull($h->read('id_1'));
         $this->assertNotNull($h->read('id_2'));
     }
