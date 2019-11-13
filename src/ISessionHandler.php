@@ -17,8 +17,6 @@
 
 namespace Opis\Session;
 
-use DateTime;
-
 interface ISessionHandler
 {
     /**
@@ -71,9 +69,10 @@ interface ISessionHandler
     public function read(string $session_id): ?SessionData;
 
     /**
+     * @param int $maxLifeTime
      * @return bool
      */
-    public function gc(): bool;
+    public function gc(int $maxLifeTime): bool;
 
     /**
      * @return string

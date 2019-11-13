@@ -46,24 +46,37 @@ class Session
      */
     public function __construct(ISessionHandler $handler, array $config = [], ICookieContainer $container = null)
     {
+        $this->handler = $handler;
+
         if ($container === null) {
             $container = new CookieContainer();
         }
 
+        $this->container = $container;
+
         $config += [
             'flash_slot' => '__flash__',
-            'gc_probability' => 1,
-            'gc_divisor' => 100,
-            'cookie_name' => 'PHPSESSIONID',
-            'cookie_lifetime' => 3600,
-            'cookie_path' => '/',
-            'cookie_domain' => '',
-            'cookie_secure' => false,
-            'cookie_httponly' => false,
+            'gc_probability' => (int) (ini_get('session.gc_probability') ?: 1),
+            'gc_divisor' => (int) (ini_get('session.gc_divisor') ?: 100),
+            'gc_maxlifetime' => (int) (ini_get('session.gc_maxlifetime') ?: 1440),
+            'cookie_name' => ini_get('session.name') ?: 'PHPSESSID',
+            //'cookie_name' => 'PHPSESSIONID',
+            'cookie_lifetime' => (int) (ini_get('session.cookie_lifetime') ?: 0),
+            'cookie_path' => ini_get('session.cookie_path') ?: '/',
+            'cookie_domain' => ini_get('session.cookie_domain') ?: '',
+            'cookie_secure' => (bool) ini_get('session.cookie_secure'),
+            'cookie_httponly' => (bool) ini_get('session.cookie_httponly'),
+            // 'cookie_samesite' => ini_get('session.cookie_samesite') ?: null,
         ];
 
+        $this->config = $config;
+
+        // Read session data
         $session = null;
         $handler->open($config['cookie_name']);
+
+        // Try GC before reading session data
+        $this->gc(false);
 
         if ($container->hasCookie($config['cookie_name'])) {
             $session = $handler->read($container->getCookie($config['cookie_name']));
@@ -71,7 +84,7 @@ class Session
 
         if ($session === null) {
             $session_id = $handler->generateSessionId();
-            $expire = time() + $config['cookie_lifetime'];
+            $expire = $config['cookie_lifetime'] ? time() + $config['cookie_lifetime'] : 0;
             $container->setCookie(
                 $config['cookie_name'],
                 $session_id,
@@ -84,21 +97,8 @@ class Session
             $session = $handler->create($session_id, $expire);
         }
 
-        $this->data = $session->data();
         $this->session = $session;
-        $this->config = $config;
-        $this->handler = $handler;
-        $this->container = $container;
-
-        // GC
-        try {
-            $r = random_int(1, $config['gc_divisor']);
-        } catch (\Exception $e) {
-            $r = rand(1, $config['gc_divisor']);
-        }
-        if ($r <= $config['gc_probability']) {
-            $handler->gc();
-        }
+        $this->data = $session->data();
     }
 
     /**
@@ -107,12 +107,36 @@ class Session
     public function __destruct()
     {
         if ($this->session !== null) {
-            $this->data[$this->config['flash_slot']] = $this->flash()->toArray();
+            $flash = $this->flash()->toArray();
+            if ($flash) {
+                $this->data[$this->config['flash_slot']] = $flash;
+            }
+            unset($flash);
             $this->session->setData($this->data);
             $this->handler->update($this->session);
         }
 
         $this->handler->close();
+    }
+
+    /**
+     * @param bool $immediate
+     * @return bool
+     */
+    public function gc(bool $immediate = false): bool
+    {
+        if (!$immediate) {
+            $probability = $this->config['gc_probability'];
+            if ($probability <= 0) {
+                return false;
+            }
+            $probability /= $this->config['gc_divisor'];
+            if (lcg_value() > $probability) {
+                return false;
+            }
+        }
+
+        return $this->handler->gc($this->config['gc_maxlifetime']);
     }
 
     /**
@@ -167,8 +191,15 @@ class Session
             return false;
         }
 
+        $expire = $this->session->expiresAt();
+
+        if ($expire === 0) {
+            return true;
+        }
+
+        $expire += $seconds;
+
         $config = $this->config;
-        $expire = $this->session->expiresAt() + $seconds;
 
         $this->container->setCookie(
             $config['cookie_name'],

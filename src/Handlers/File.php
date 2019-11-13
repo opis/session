@@ -60,9 +60,9 @@ class File implements ISessionHandler
      */
     public function open(string $name)
     {
-        $this->filename = $this->getHeaderFilename($this->path, $name);
+        $this->filename = $this->getHeaderFilename($name);
 
-        if (!file_exists($this->filename)) {
+        if (!is_file($this->filename)) {
             file_put_contents($this->filename, $this->serializeHeaderData([]));
         }
     }
@@ -73,6 +73,7 @@ class File implements ISessionHandler
     public function close()
     {
         $this->releaseLock();
+        $this->filename = null;
     }
 
     /**
@@ -114,31 +115,23 @@ class File implements ISessionHandler
      */
     public function deleteMultipleById(array $session_ids): int
     {
-        $this->acquireLock();
-
-        $content = '';
-
-        while (!feof($this->fp)) {
-            $content .= fread($this->fp, 1024);
+        if (!$this->acquireLock()) {
+            return 0;
         }
 
         $count = 0;
-        $data = $this->unserializeHeaderData($content);
+        $data = $this->unserializeHeaderData($this->getHeaderContent());
 
         foreach ($session_ids as $session_id) {
             if (!isset($data[$session_id])) {
                 continue;
             }
             unset($data[$session_id]);
-            unlink($this->getSessionDataFilename($this->path, $session_id));
+            @unlink($this->getSessionDataFilename($session_id));
             $count++;
         }
 
-        $content = $this->serializeHeaderData($data);
-
-        fseek($this->fp, 0);
-        ftruncate($this->fp, strlen($content));
-        fwrite($this->fp, $content);
+        $this->setHeaderContent($this->serializeHeaderData($data));
 
         $this->releaseLock();
 
@@ -150,51 +143,84 @@ class File implements ISessionHandler
      */
     public function read(string $session_id): ?SessionData
     {
-        $file = $this->getSessionDataFilename($this->path, $session_id);
+        $file = $this->getSessionDataFilename($session_id);
 
-        if (!file_exists($file)) {
+        if (!is_file($file)) {
             return null;
         }
 
-        $this->acquireLock();
+        if (!$this->acquireLock()) {
+            return null;
+        }
         $content = $this->unserializeSessionData(file_get_contents($file));
         $this->releaseLock();
+
         return $content;
     }
 
     /**
      * @inheritDoc
      */
-    public function gc(): bool
+    public function gc(int $maxLifeTime): bool
     {
-        $this->acquireLock();
-
-        $content = '';
-
-        while (!feof($this->fp)) {
-            $content .= fread($this->fp, 1024);
+        if (!$this->acquireLock()) {
+            return false;
         }
 
-        $tmp = $this->unserializeHeaderData($content);
-        $timestamp = time();
+        $timestamp = time() - $maxLifeTime;
 
-        $data = [];
+        $data = $this->unserializeHeaderData($this->getHeaderContent());
 
-        foreach ($tmp as $key => $expire) {
-            if ($expire > $timestamp) {
-                $data[$key] = $expire;
-            } else {
-                unlink($this->getSessionDataFilename($this->path, $key));
+        $zeroed = [];
+        $changed = false;
+
+        foreach ($data as $key => $expire) {
+            if ($expire === 0) {
+                $zeroed[] = $key;
+            } elseif ($expire < $timestamp) {
+                unset($data[$key]);
+                @unlink($this->getSessionDataFilename($key));
+                $changed = true;
             }
         }
 
-        unset($tmp);
+        foreach ($zeroed as $key) {
+            $file = $this->getSessionDataFilename($key);
+            if (!is_file($file)) {
+                unset($data[$key]);
+                $changed = true;
+                continue;
+            }
 
-        $content = $this->serializeHeaderData($data);
+            $session = $this->unserializeSessionData(file_get_contents($file));
+            if ($session === null) {
+                unset($data[$key]);
+                $changed = true;
+                continue;
+            }
 
-        fseek($this->fp, 0);
-        ftruncate($this->fp, strlen($content));
-        fwrite($this->fp, $content);
+            $expire = $session->expiresAt();
+            if ($expire !== 0) {
+                // Somehow the expires is not 0, check to see if expired
+                if ($expire < $timestamp) {
+                    unset($data[$key]);
+                    @unlink($file);
+                    $changed = true;
+                }
+            } elseif ($session->updatedAt() < $timestamp) { // Check last update
+                unset($data[$key]);
+                @unlink($file);
+                $changed = true;
+            }
+
+            unset($session);
+        }
+
+        unset($zeroed);
+
+        if ($changed) {
+            $this->setHeaderContent($this->serializeHeaderData($data));
+        }
 
         return $this->releaseLock();
     }
@@ -241,27 +267,28 @@ class File implements ISessionHandler
      */
     protected function unserializeHeaderData(string $data): array
     {
+        if ($data === '') {
+            return [];
+        }
         return unserialize($data);
     }
 
     /**
-     * @param string $path
      * @param string $name
      * @return string
      */
-    protected function getHeaderFilename(string $path, string $name): string
+    protected function getHeaderFilename(string $name): string
     {
-        return $path . DIRECTORY_SEPARATOR . $name . '.session';
+        return $this->path . DIRECTORY_SEPARATOR . $name . '.session';
     }
 
     /**
-     * @param string $path
      * @param string $session_id
      * @return string
      */
-    protected function getSessionDataFilename(string $path, string $session_id): string
+    protected function getSessionDataFilename(string $session_id): string
     {
-        return $path . DIRECTORY_SEPARATOR . $session_id;
+        return $this->path . DIRECTORY_SEPARATOR . $session_id;
     }
 
     /**
@@ -270,26 +297,18 @@ class File implements ISessionHandler
      */
     private function createOrUpdate(SessionData $session): bool
     {
-        $this->acquireLock();
-
-        $content = '';
-
-        while (!feof($this->fp)) {
-            $content .= fread($this->fp, 1024);
+        if (!$this->acquireLock()) {
+            return false;
         }
 
-        $data = $this->unserializeHeaderData($content);
+        $data = $this->unserializeHeaderData($this->getHeaderContent());
 
         $session_id = $session->id();
-        $file = $this->getSessionDataFilename($this->path, $session_id);
-        file_put_contents($file, $this->serializeSessionData($session));
+        file_put_contents($this->getSessionDataFilename($session_id), $this->serializeSessionData($session));
 
         if (!isset($data[$session_id]) || $data[$session_id] !== $session->expiresAt()) {
             $data[$session_id] = $session->expiresAt();
-            $content = $this->serializeHeaderData($data);
-            fseek($this->fp, 0);
-            ftruncate($this->fp, strlen($content));
-            fwrite($this->fp, $content);
+            $this->setHeaderContent($this->serializeHeaderData($data));
         }
 
         return $this->releaseLock();
@@ -300,6 +319,10 @@ class File implements ISessionHandler
      */
     private function acquireLock(): bool
     {
+        if (!$this->filename) {
+            return false;
+        }
+
         if ($this->fp === null) {
             $this->fp = fopen($this->filename, 'c+');
         }
@@ -318,5 +341,30 @@ class File implements ISessionHandler
             $this->fp = null;
         }
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    private function getHeaderContent(): string
+    {
+        $fp = $this->fp;
+        fseek($fp, 0, SEEK_SET);
+        $content = '';
+        while (!feof($fp)) {
+            $content .= fread($fp, 8192);
+        }
+        return $content;
+    }
+
+    /**
+     * @param string $content
+     */
+    private function setHeaderContent(string $content)
+    {
+        $fp = $this->fp;
+        fseek($fp, 0, SEEK_SET);
+        ftruncate($fp, strlen($content));
+        fwrite($fp, $content);
     }
 }
