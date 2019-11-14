@@ -24,10 +24,8 @@ use Opis\Database\Database as OpisDatabase;
 
 class Database implements ISessionHandler
 {
-    /** @var Connection */
-    protected $connection;
     /** @var OpisDatabase|null */
-    protected $database = null;
+    protected $db;
     /** @var string */
     protected $table;
     /** @var string[] */
@@ -43,7 +41,7 @@ class Database implements ISessionHandler
      */
     public function __construct(Connection $connection, string $table = 'sessions', array $columns = [])
     {
-        $this->connection = $connection;
+        $this->db = new OpisDatabase($connection);
         $this->table = $table;
         $this->columns = $columns + [
                 'id' => 'id',
@@ -101,7 +99,7 @@ class Database implements ISessionHandler
 
         $col = $this->columns;
 
-        $exists = $this->db()->from($this->table)
+        $exists = $this->db->from($this->table)
                 ->where($col['name'])
                 ->is($this->name)
                 ->andWhere($col['id'])
@@ -117,7 +115,7 @@ class Database implements ISessionHandler
 
         if ($exists) {
             $d[$col['updated_at']] = time();
-            return $this->db()->update($this->table)
+            return $this->db->update($this->table)
                 ->where($col['name'])
                 ->is($this->name)
                 ->andWhere($col['id'])
@@ -128,7 +126,7 @@ class Database implements ISessionHandler
         $d[$col['name']] = $this->name;
         $d[$col['id']] = $data->id();
 
-        return $this->db()->insert($d)->into($this->table);
+        return $this->db->insert($d)->into($this->table);
     }
 
     /**
@@ -158,7 +156,7 @@ class Database implements ISessionHandler
 
         $col = $this->columns;
 
-        return $this->db()->from($this->table)
+        return $this->db->from($this->table)
             ->where($col['id'])
             ->in($session_ids)
             ->andWhere($col['name'])
@@ -177,7 +175,7 @@ class Database implements ISessionHandler
 
         $col = $this->columns;
 
-        $result = $this->db()->from($this->table)
+        $result = $this->db->from($this->table)
             ->where($col['id'])
             ->is($session_id)
             ->andWhere($col['name'])
@@ -214,7 +212,7 @@ class Database implements ISessionHandler
 
         $col = $this->columns;
 
-        return $this->db()->from($this->table)
+        return $this->db->from($this->table)
                 ->where($col['name'])
                 ->is($this->name)
                 ->andWhere(function (WhereStatement $query) use ($col, $timestamp) {
@@ -264,16 +262,5 @@ class Database implements ISessionHandler
     protected function serializeData(array $data): string
     {
         return serialize($data);
-    }
-
-    /**
-     * @return OpisDatabase
-     */
-    protected function db(): OpisDatabase
-    {
-        if ($this->database === null) {
-            $this->database = new OpisDatabase($this->connection);
-        }
-        return $this->database;
     }
 }
