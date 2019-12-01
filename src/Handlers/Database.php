@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2018-2019 Zindex Software
+ * Copyright 2019 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,20 @@ namespace Opis\Session\Handlers;
 
 use Opis\Database\Connection;
 use Opis\Database\SQL\WhereStatement;
-use Opis\Session\{SessionData, ISessionHandler};
 use Opis\Database\Database as OpisDatabase;
+use Opis\Session\{SessionData, ISessionHandler};
 
 class Database implements ISessionHandler
 {
     /** @var OpisDatabase|null */
     protected $db;
+
     /** @var string */
     protected $table;
+
     /** @var string[] */
     protected $columns;
+
     /** @var string|null */
     protected $name = null;
 
@@ -44,13 +47,13 @@ class Database implements ISessionHandler
         $this->db = new OpisDatabase($connection);
         $this->table = $table;
         $this->columns = $columns + [
-                'id' => 'id',
-                'name' => 'name',
-                'expire' => 'expire',
-                'created_at' => 'created_at',
-                'updated_at' => 'updated_at',
-                'data' => 'data',
-            ];
+            'id' => 'id',
+            'name' => 'name',
+            'expire' => 'expire',
+            'created_at' => 'created_at',
+            'updated_at' => 'updated_at',
+            'data' => 'data',
+        ];
     }
 
     /**
@@ -80,14 +83,6 @@ class Database implements ISessionHandler
     }
 
     /**
-     * @inheritDoc
-     */
-    public function update(SessionData $data): bool
-    {
-        return $this->createOrUpdate($data);
-    }
-
-    /**
      * @param SessionData $data
      * @return bool
      */
@@ -100,10 +95,8 @@ class Database implements ISessionHandler
         $col = $this->columns;
 
         $exists = $this->db->from($this->table)
-                ->where($col['name'])
-                ->is($this->name)
-                ->andWhere($col['id'])
-                ->is($data->id())
+                ->where($col['name'])->is($this->name)
+                ->andWhere($col['id'])->is($data->id())
                 ->limit(1)
                 ->count() > 0;
 
@@ -116,17 +109,32 @@ class Database implements ISessionHandler
         if ($exists) {
             $d[$col['updated_at']] = time();
             return $this->db->update($this->table)
-                ->where($col['name'])
-                ->is($this->name)
-                ->andWhere($col['id'])
-                ->is($data->id())
-                ->set($d) > 0;
+                    ->where($col['name'])->is($this->name)
+                    ->andWhere($col['id'])->is($data->id())
+                    ->set($d) > 0;
         }
 
         $d[$col['name']] = $this->name;
         $d[$col['id']] = $data->id();
 
         return $this->db->insert($d)->into($this->table);
+    }
+
+    /**
+     * @param array $data
+     * @return string
+     */
+    protected function serializeData(array $data): string
+    {
+        return serialize($data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function update(SessionData $data): bool
+    {
+        return $this->createOrUpdate($data);
     }
 
     /**
@@ -157,10 +165,8 @@ class Database implements ISessionHandler
         $col = $this->columns;
 
         return $this->db->from($this->table)
-            ->where($col['id'])
-            ->in($session_ids)
-            ->andWhere($col['name'])
-            ->is($this->name)
+            ->where($col['id'])->in($session_ids)
+            ->andWhere($col['name'])->is($this->name)
             ->delete();
     }
 
@@ -176,10 +182,8 @@ class Database implements ISessionHandler
         $col = $this->columns;
 
         $result = $this->db->from($this->table)
-            ->where($col['id'])
-            ->is($session_id)
-            ->andWhere($col['name'])
-            ->is($this->name)
+            ->where($col['id'])->is($session_id)
+            ->andWhere($col['name'])->is($this->name)
             ->limit(1)
             ->select()
             ->first();
@@ -188,7 +192,7 @@ class Database implements ISessionHandler
             return null;
         }
 
-        $result = (array) $result;
+        $result = (array)$result;
 
         return new SessionData(
             $result[$col['id']],
@@ -197,49 +201,6 @@ class Database implements ISessionHandler
             $result[$col['created_at']] ?? null,
             $result[$col['updated_at']] ?? null
         );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function gc(int $maxLifeTime): bool
-    {
-        if ($this->name === null) {
-            return false;
-        }
-
-        $timestamp = time() - $maxLifeTime;
-
-        $col = $this->columns;
-
-        return $this->db->from($this->table)
-                ->where($col['name'])
-                ->is($this->name)
-                ->andWhere(function (WhereStatement $query) use ($col, $timestamp) {
-                    $query
-                        ->where(function (WhereStatement $query) use ($col, $timestamp) {
-                            $query
-                                ->where($col['expire'])->is(0)
-                                ->andWhere($col['updated_at'])
-                                ->lessThan($timestamp);
-                        })
-                        ->orWhere(function (WhereStatement $query) use ($col, $timestamp) {
-                            $query
-                                ->where($col['expire'])
-                                ->isNot(0)
-                                ->andWhere($col['expire'])
-                                ->lessThan($timestamp);
-                        });
-                })
-                ->delete() > 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function generateSessionId(): string
-    {
-        return session_create_id();
     }
 
     /**
@@ -256,11 +217,41 @@ class Database implements ISessionHandler
     }
 
     /**
-     * @param array $data
-     * @return string
+     * @inheritDoc
      */
-    protected function serializeData(array $data): string
+    public function gc(int $maxLifeTime): bool
     {
-        return serialize($data);
+        if ($this->name === null) {
+            return false;
+        }
+
+        $timestamp = time() - $maxLifeTime;
+
+        $col = $this->columns;
+
+        return $this->db->from($this->table)
+                ->where($col['name'])->is($this->name)
+                ->andWhere(function (WhereStatement $query) use ($col, $timestamp) {
+                    $query
+                        ->where(function (WhereStatement $query) use ($col, $timestamp) {
+                            $query
+                                ->where($col['expire'])->is(0)
+                                ->andWhere($col['updated_at'])->lessThan($timestamp);
+                        })
+                        ->orWhere(function (WhereStatement $query) use ($col, $timestamp) {
+                            $query
+                                ->where($col['expire'])->isNot(0)
+                                ->andWhere($col['expire'])->lessThan($timestamp);
+                        });
+                })
+                ->delete() > 0;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function generateSessionId(): string
+    {
+        return session_create_id();
     }
 }
