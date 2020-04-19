@@ -40,18 +40,21 @@ class Session
     /**
      * Session constructor.
      *
-     * @param ISessionHandler $handler
      * @param array $config
+     * @param ISessionHandler|null $handler
      * @param ICookieContainer|null $container
      */
-    public function __construct(ISessionHandler $handler, array $config = [], ICookieContainer $container = null)
+    public function __construct(array $config = [], ISessionHandler $handler = null, ICookieContainer $container = null)
     {
-        $this->handler = $handler;
+        if ($handler === null) {
+            $handler = new Handlers\File(ini_get('session.save_path') ?: sys_get_temp_dir());
+        }
 
         if ($container === null) {
             $container = new CookieContainer();
         }
 
+        $this->handler = $handler;
         $this->container = $container;
 
         $config += [
