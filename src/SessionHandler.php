@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ interface SessionHandler
      * @param string $name
      * @return mixed
      */
-    public function open(string $name);
+    public function open(string $name): void;
 
     /**
      * @return void
      */
-    public function close();
+    public function close(): void;
 
     /**
      * @param string $session_id

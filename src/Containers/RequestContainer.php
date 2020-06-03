@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ use Opis\Session\CookieContainer;
 
 class RequestContainer implements CookieContainer
 {
-    /** @var Request|null */
-    private $request;
 
-    private $cookies = [];
+    private ?Request $request;
+
+    private array $cookies = [];
 
     /**
      * CookieContainer constructor.
      * @param Request|null $request
      */
-    public function __construct(?Request $request)
+    public function __construct(?Request $request = null)
     {
         $this->request = $request;
     }
@@ -66,20 +66,22 @@ class RequestContainer implements CookieContainer
     public function setCookie(
         string $name,
         string $value,
-        int $expire = 0,
+        int $expires = 0,
         string $path = "",
         string $domain = "",
         bool $secure = false,
-        bool $http_only = false
+        bool $httponly = false,
+        ?string $samesite = null
     ): bool {
         $this->cookies[$name] = [
             'name' => $name,
             'value' => $value,
-            'expire' => $expire,
+            'expires' => $expires,
             'path' => $path,
             'domain' => $domain,
             'secure' => $secure,
-            'http_only' => $http_only
+            'httponly' => $httponly,
+            'samesite' => $samesite,
         ];
 
         return true;

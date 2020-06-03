@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@
 namespace Opis\Session\Handlers;
 
 use RuntimeException;
-use Opis\Session\SessionHandler;
-use Opis\Session\SessionData;
+use Opis\Session\{
+    SessionData, SessionHandler
+};
 
 class File implements SessionHandler
 {
-    /** @var string */
-    private $path;
+
+    private string $path;
 
     /** @var resource */
     private $fp;
 
-    /** @var string */
-    private $filename;
+    private ?string $filename = null;
 
     /**
      * DefaultHandler constructor.
@@ -58,7 +58,7 @@ class File implements SessionHandler
     /**
      * @inheritDoc
      */
-    public function open(string $name)
+    public function open(string $name): void
     {
         $this->filename = $this->getHeaderFilename($name);
 
@@ -70,7 +70,7 @@ class File implements SessionHandler
     /**
      * @inheritDoc
      */
-    public function close()
+    public function close(): void
     {
         $this->releaseLock();
         $this->filename = null;
@@ -152,6 +152,7 @@ class File implements SessionHandler
         if (!$this->acquireLock()) {
             return null;
         }
+
         $content = $this->unserializeSessionData(file_get_contents($file));
         $this->releaseLock();
 

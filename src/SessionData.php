@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,18 @@
 
 namespace Opis\Session;
 
-final class SessionData implements \Serializable
+final class SessionData
 {
-    /** @var string */
-    private $id;
 
-    /** @var int */
-    private $expire;
+    private string $id;
 
-    /** @var array */
-    private $data;
+    private int $expire;
 
-    /** @var int */
-    private $createdAt;
+    private array $data;
 
-    /** @var int|null */
-    private $updatedAt;
+    private int $createdAt;
+
+    private int $updatedAt;
 
     /**
      * SessionData constructor.
@@ -42,13 +38,13 @@ final class SessionData implements \Serializable
      * @param int|null $createdAt
      * @param int|null $updatedAt
      */
-    public function __construct(string $id, int $expire, array $data = [], int $createdAt = null, int $updatedAt = null)
+    public function __construct(string $id, int $expire, array $data = [], ?int $createdAt = null, ?int $updatedAt = null)
     {
         if ($createdAt === null) {
             $updatedAt = $createdAt = time();
         }
 
-        if ($createdAt > $updatedAt) {
+        if ($updatedAt === null || $createdAt > $updatedAt) {
             $updatedAt = $createdAt;
         }
 
@@ -78,7 +74,7 @@ final class SessionData implements \Serializable
     /**
      * @param int $timestamp
      */
-    public function setExpirationDate(int $timestamp)
+    public function setExpirationDate(int $timestamp): void
     {
         $this->expire = $timestamp;
     }
@@ -117,26 +113,20 @@ final class SessionData implements \Serializable
         return $this->updatedAt;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function serialize()
+
+    public function __serialize(): array
     {
-        return serialize([
+        return [
             'id' => $this->id,
             'expire' => $this->expire,
             'createdAt' => $this->createdAt,
             'updatedAt' => time(),
             'data' => $this->data,
-        ]);
+        ];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
-        $data = unserialize($serialized);
         $this->id = $data['id'];
         $this->expire = $data['expire'];
         $this->createdAt = $data['createdAt'];

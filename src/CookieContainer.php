@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,20 +34,22 @@ interface CookieContainer
     /**
      * @param string $name
      * @param string $value
-     * @param int $expire
+     * @param int $expires
      * @param string $path
      * @param string $domain
      * @param bool $secure
-     * @param bool $http_only
+     * @param bool $httponly
+     * @param string|null $samesite
      * @return bool
      */
     public function setCookie(
         string $name,
         string $value,
-        int $expire = 0,
+        int $expires = 0,
         string $path = "",
         string $domain = "",
         bool $secure = false,
-        bool $http_only = false
+        bool $httponly = false,
+        ?string $samesite = null
     ): bool;
 }

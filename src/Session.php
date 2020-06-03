@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,18 @@ use Opis\Session\Containers\DefaultContainer;
 
 class Session
 {
-    /** @var array */
-    private $config;
 
-    /** @var SessionHandler */
-    private $handler;
+    private array $config;
 
-    /** @var CookieContainer */
-    private $container;
+    private SessionHandler $handler;
 
-    /** @var array */
-    private $data;
+    private CookieContainer $container;
 
-    /** @var Flash|null */
-    private $flash;
+    private array $data;
 
-    /** @var SessionData */
-    private $session;
+    private ?Flash $flash;
+
+    private ?SessionData $session;
 
     /**
      * Session constructor.
@@ -46,7 +41,7 @@ class Session
      * @param SessionHandler|null $handler
      * @param CookieContainer|null $container
      */
-    public function __construct(array $config = [], SessionHandler $handler = null, CookieContainer $container = null)
+    public function __construct(array $config = [], ?SessionHandler $handler = null, ?CookieContainer $container = null)
     {
         if ($handler === null) {
             $handler = new Handlers\File(ini_get('session.save_path') ?: sys_get_temp_dir());
@@ -64,14 +59,14 @@ class Session
             'gc_probability' => (int) (ini_get('session.gc_probability') ?: 1),
             'gc_divisor' => (int) (ini_get('session.gc_divisor') ?: 100),
             'gc_maxlifetime' => (int) (ini_get('session.gc_maxlifetime') ?: 1440),
+
             'cookie_name' => ini_get('session.name') ?: 'PHPSESSID',
-            //'cookie_name' => 'PHPSESSIONID',
             'cookie_lifetime' => (int) (ini_get('session.cookie_lifetime') ?: 0),
             'cookie_path' => ini_get('session.cookie_path') ?: '/',
             'cookie_domain' => ini_get('session.cookie_domain') ?: '',
             'cookie_secure' => (bool) ini_get('session.cookie_secure'),
             'cookie_httponly' => (bool) ini_get('session.cookie_httponly'),
-            // 'cookie_samesite' => ini_get('session.cookie_samesite') ?: null,
+            'cookie_samesite' => ini_get('session.cookie_samesite') ?: null,
         ];
 
         $this->config = $config;
@@ -97,7 +92,8 @@ class Session
                 $config['cookie_path'],
                 $config['cookie_domain'],
                 $config['cookie_secure'],
-                $config['cookie_httponly']
+                $config['cookie_httponly'],
+                $config['cookie_samesite']
             );
             $session = $handler->create($session_id, $expire);
         }
@@ -213,7 +209,8 @@ class Session
             $config['cookie_path'],
             $config['cookie_domain'],
             $config['cookie_secure'],
-            $config['cookie_httponly']
+            $config['cookie_httponly'],
+            $config['cookie_samesite']
         );
 
         $this->session->setExpirationDate($expire);
@@ -243,10 +240,14 @@ class Session
      *
      * @param string $key Session key
      * @param mixed $value Session data
+     *
+     * @return self
      */
-    public function set(string $key, $value)
+    public function set(string $key, $value): self
     {
         $this->data[$key] = $value;
+
+        return $this;
     }
 
     /**
@@ -282,10 +283,14 @@ class Session
      * Removes a value from the session.
      *
      * @param string $key Session key
+     *
+     * @return self
      */
-    public function delete(string $key)
+    public function delete(string $key): self
     {
         unset($this->data[$key]);
+
+        return $this;
     }
 
     /**
@@ -306,14 +311,18 @@ class Session
      * Clears all session data.
      *
      * @param bool $flash
+     *
+     * @return self
      */
-    public function clear(bool $flash = true)
+    public function clear(bool $flash = true): self
     {
         $f = $this->flash();
         if ($flash) {
             $f->clear();
         }
         $this->data = [];
+
+        return $this;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,25 @@ class DefaultContainer implements CookieContainer
     public function setCookie(
         string $name,
         string $value,
-        int $expire = 0,
+        int $expires = 0,
         string $path = "",
         string $domain = "",
         bool $secure = false,
-        bool $http_only = false
+        bool $httponly = false,
+        ?string $samesite = null
     ): bool {
-        return setcookie($name, $value, $expire, $path, $domain, $secure, $http_only);
+        $options = [
+            'expires' => $expires,
+            'path' => $path,
+            'domain' => $domain,
+            'secure' => $secure,
+            'httponly' => $httponly,
+        ];
+
+        if ($samesite) {
+            $options['samesite'] = $samesite;
+        }
+
+        return setcookie($name, $value, $options);
     }
 }

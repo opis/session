@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 
 namespace Opis\Session\Handlers;
 
-use Opis\Session\SessionHandler;
-use Opis\Session\SessionData;
+use Opis\Session\{
+    SessionData,SessionHandler
+};
 
 class Memory implements SessionHandler
 {
-    private $sessions = [];
+    private array $sessions = [];
 
     /**
      * @inheritDoc
      */
-    public function open(string $name)
+    public function open(string $name): void
     {
         // Do nothing
     }
@@ -35,7 +36,7 @@ class Memory implements SessionHandler
     /**
      * @inheritDoc
      */
-    public function close()
+    public function close(): void
     {
         // Do nothing
     }

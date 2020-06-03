@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2018 Zindex Software
+ * Copyright 2018-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ namespace Opis\Session;
 
 class Flash
 {
-    /** @var array */
-    protected $data = [];
 
-    /** @var array */
-    protected $session;
+    protected array $data = [];
+
+    protected array $session;
 
     /**
      * @param array $session
@@ -43,6 +42,7 @@ class Flash
     public function set(string $key, $value): self
     {
         $this->data[$key] = $value;
+
         return $this;
     }
 
@@ -84,6 +84,7 @@ class Flash
     {
         unset($this->data[$key]);
         unset($this->session[$key]);
+
         return $this;
     }
 
@@ -116,6 +117,7 @@ class Flash
     {
         $this->data = $data;
         $this->session = [];
+
         return $this;
     }
 
@@ -133,6 +135,7 @@ class Flash
         }
 
         $session = array_intersect_key($this->session, array_flip($keys));
+
         return $this->clear($this->data + $session);
     }
 

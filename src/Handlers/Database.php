@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2019 Zindex Software
+ * Copyright 2019-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,14 @@ use Opis\Session\{SessionData, SessionHandler};
 
 class Database implements SessionHandler
 {
-    /** @var OpisDatabase|null */
-    protected $db;
 
-    /** @var string */
-    protected $table;
+    protected ?OpisDatabase $db;
 
-    /** @var string[] */
-    protected $columns;
+    protected string $table;
 
-    /** @var string|null */
-    protected $name = null;
+    protected array $columns;
+
+    protected ?string $name = null;
 
     /**
      * Database constructor.
@@ -59,7 +56,7 @@ class Database implements SessionHandler
     /**
      * @inheritDoc
      */
-    public function open(string $name)
+    public function open(string $name): void
     {
         $this->name = $name;
     }
@@ -67,7 +64,7 @@ class Database implements SessionHandler
     /**
      * @inheritDoc
      */
-    public function close()
+    public function close(): void
     {
         $this->name = null;
     }
@@ -231,14 +228,14 @@ class Database implements SessionHandler
 
         return $this->db->from($this->table)
                 ->where($col['name'])->is($this->name)
-                ->andWhere(function (WhereStatement $query) use ($col, $timestamp) {
+                ->andWhere(static function (WhereStatement $query) use ($col, $timestamp) {
                     $query
-                        ->where(function (WhereStatement $query) use ($col, $timestamp) {
+                        ->where(static function (WhereStatement $query) use ($col, $timestamp) {
                             $query
                                 ->where($col['expire'])->is(0)
                                 ->andWhere($col['updated_at'])->lessThan($timestamp);
                         })
-                        ->orWhere(function (WhereStatement $query) use ($col, $timestamp) {
+                        ->orWhere(static function (WhereStatement $query) use ($col, $timestamp) {
                             $query
                                 ->where($col['expire'])->isNot(0)
                                 ->andWhere($col['expire'])->lessThan($timestamp);
