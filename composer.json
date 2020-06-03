@@ -18,6 +18,7 @@
         "php": "^7.4"
     },
     "require-dev": {
+        "ext-json": "*",
         "phpunit/phpunit": "^9.0",
         "opis/http": "2020.x-dev",
         "opis/database": "^4.1"

@@ -1,6 +1,6 @@
 <?php
 /* ===========================================================================
- * Copyright 2018 Zindex Software
+ * Copyright 2018-2020 Zindex Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,40 +17,18 @@
 
 namespace Opis\Session\Test;
 
-use Opis\Session\{Handlers\File, SessionHandler};
+use Opis\Session\SessionHandler;
+use Opis\Session\Handlers\Memory;
 use PHPUnit\Framework\TestCase;
 
 class HandlerTest extends TestCase
 {
-    /** @var SessionHandler */
-    protected static $handler;
+    protected static SessionHandler $handler;
 
     public static function setUpBeforeClass(): void
     {
-        static::$handler = $h = new File(__DIR__ . DIRECTORY_SEPARATOR . 'sessions');
+        static::$handler = $h = new Memory();
         $h->open('PHPSESSIONID');
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        $rrmdir = function($dir) use(&$rrmdir) {
-            if (is_dir($dir)) {
-                $objects = scandir($dir);
-                foreach ($objects as $object) {
-                    if ($object != "." && $object != "..") {
-                        if (is_dir($dir . DIRECTORY_SEPARATOR . $object)) {
-                            $rrmdir($dir . DIRECTORY_SEPARATOR . $object);
-                        } else {
-                            unlink   ($dir . DIRECTORY_SEPARATOR . $object);
-                        }
-                    }
-                }
-                reset($objects);
-                rmdir($dir);
-            }
-        };
-
-        $rrmdir(__DIR__ . DIRECTORY_SEPARATOR . 'sessions');
     }
 
     public function testCreateSession()

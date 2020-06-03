@@ -23,6 +23,8 @@ use Opis\Session\{
 
 class Memory implements SessionHandler
 {
+
+    /** @var SessionData[] */
     private array $sessions = [];
 
     /**
@@ -104,6 +106,14 @@ class Memory implements SessionHandler
      */
     public function gc(int $maxLifeTime): bool
     {
+        $timestamp = time() - $maxLifeTime;
+
+        foreach ($this->sessions as $key => $session) {
+            if ($session->isExpiredAt($timestamp)) {
+                unset($this->sessions[$key]);
+            }
+        }
+
         return true;
     }
 

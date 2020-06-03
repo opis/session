@@ -113,6 +113,18 @@ final class SessionData
         return $this->updatedAt;
     }
 
+    /**
+     * @param int $timestamp
+     * @return bool
+     */
+    public function isExpiredAt(int $timestamp): bool
+    {
+        if ($this->expire === 0) {
+            return $this->updatedAt < $timestamp;
+        }
+
+        return $this->expire < $timestamp;
+    }
 
     public function __serialize(): array
     {
