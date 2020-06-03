@@ -15,31 +15,30 @@
  * limitations under the License.
  * ============================================================================ */
 
-namespace Opis\Session;
+namespace Opis\Session\Containers;
 
-interface ICookieContainer
+use Opis\Session\CookieContainer;
+
+class DefaultContainer implements CookieContainer
 {
     /**
-     * @param string $name
-     * @return bool
+     * @inheritDoc
      */
-    public function hasCookie(string $name): bool;
+    public function hasCookie(string $name): bool
+    {
+        return isset($_COOKIE[$name]);
+    }
 
     /**
-     * @param string $name
-     * @return string|null
+     * @inheritDoc
      */
-    public function getCookie(string $name): ?string;
+    public function getCookie(string $name): ?string
+    {
+        return $_COOKIE[$name] ?? null;
+    }
 
     /**
-     * @param string $name
-     * @param string $value
-     * @param int $expire
-     * @param string $path
-     * @param string $domain
-     * @param bool $secure
-     * @param bool $http_only
-     * @return bool
+     * @inheritDoc
      */
     public function setCookie(
         string $name,
@@ -49,5 +48,7 @@ interface ICookieContainer
         string $domain = "",
         bool $secure = false,
         bool $http_only = false
-    ): bool;
+    ): bool {
+        return setcookie($name, $value, $expire, $path, $domain, $secure, $http_only);
+    }
 }

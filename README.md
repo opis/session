@@ -1,6 +1,6 @@
 Opis Session
 ============
-[![Build Status](https://travis-ci.org/opis/session.png)](https://travis-ci.org/opis/session)
+[![Tests](https://github.com/opis/session/workflows/Tests/badge.svg)](https://github.com/opis/session/actions)
 [![Latest Stable Version](https://poser.pugx.org/opis/session/version.png)](https://packagist.org/packages/opis/session)
 [![Latest Unstable Version](https://poser.pugx.org/opis/session/v/unstable.png)](https://packagist.org/packages/opis/session)
 [![License](https://poser.pugx.org/opis/session/license.png)](https://packagist.org/packages/opis/session)
@@ -12,17 +12,17 @@ developers with an API which allows them to handle session related information i
 
 The currently available handlers are: File and native store. 
 
-### Documentation
+## Documentation
 
 The full documentation for this library can be found [here][documentation].
 
-### License
+## License
 
-**Opis Session** is licensed under the [Apache License, Version 2.0][apache_license].
+**Opis Session** is licensed under the [Apache License, Version 2.0][license].
 
-### Requirements
+## Requirements
 
-* PHP ^7.0
+* PHP ^7.4
 
 ## Installation
 
@@ -38,12 +38,12 @@ Or you could directly reference it into your `composer.json` file as a dependenc
 ```json
 {
     "require": {
-        "opis/session": "^4.0"
+        "opis/session": "^2020"
     }
 }
 ```
 
 [documentation]: https://www.opis.io/session
-[apache_license]: https://www.apache.org/licenses/LICENSE-2.0 "Apache License"
+[license]: https://www.apache.org/licenses/LICENSE-2.0 "Apache License"
 [Packagist]: https://packagist.org/packages/opis/session "Packagist"
 [Composer]: https://getcomposer.org "Composer"

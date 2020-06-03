@@ -17,26 +17,29 @@
 
 namespace Opis\Session;
 
-class CookieContainer implements ICookieContainer
+interface CookieContainer
 {
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return bool
      */
-    public function hasCookie(string $name): bool
-    {
-        return isset($_COOKIE[$name]);
-    }
+    public function hasCookie(string $name): bool;
 
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return string|null
      */
-    public function getCookie(string $name): ?string
-    {
-        return $_COOKIE[$name] ?? null;
-    }
+    public function getCookie(string $name): ?string;
 
     /**
-     * @inheritDoc
+     * @param string $name
+     * @param string $value
+     * @param int $expire
+     * @param string $path
+     * @param string $domain
+     * @param bool $secure
+     * @param bool $http_only
+     * @return bool
      */
     public function setCookie(
         string $name,
@@ -46,7 +49,5 @@ class CookieContainer implements ICookieContainer
         string $domain = "",
         bool $secure = false,
         bool $http_only = false
-    ): bool {
-        return setcookie($name, $value, $expire, $path, $domain, $secure, $http_only);
-    }
+    ): bool;
 }

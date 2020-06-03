@@ -17,22 +17,21 @@
 
 namespace Opis\Session\Test;
 
-use Opis\Session\Handlers\File;
-use Opis\Session\ISessionHandler;
+use Opis\Session\{Handlers\File, SessionHandler};
 use PHPUnit\Framework\TestCase;
 
 class HandlerTest extends TestCase
 {
-    /** @var ISessionHandler */
+    /** @var SessionHandler */
     protected static $handler;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         static::$handler = $h = new File(__DIR__ . DIRECTORY_SEPARATOR . 'sessions');
         $h->open('PHPSESSIONID');
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         $rrmdir = function($dir) use(&$rrmdir) {
             if (is_dir($dir)) {

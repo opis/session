@@ -20,9 +20,9 @@ namespace Opis\Session\Handlers;
 use Opis\Database\Connection;
 use Opis\Database\SQL\WhereStatement;
 use Opis\Database\Database as OpisDatabase;
-use Opis\Session\{SessionData, ISessionHandler};
+use Opis\Session\{SessionData, SessionHandler};
 
-class Database implements ISessionHandler
+class Database implements SessionHandler
 {
     /** @var OpisDatabase|null */
     protected $db;

@@ -18,10 +18,10 @@
 namespace Opis\Session\Handlers;
 
 use RuntimeException;
-use Opis\Session\ISessionHandler;
+use Opis\Session\SessionHandler;
 use Opis\Session\SessionData;
 
-class File implements ISessionHandler
+class File implements SessionHandler
 {
     /** @var string */
     private $path;

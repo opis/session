@@ -17,7 +17,7 @@
 
 namespace Opis\Session;
 
-interface ISessionHandler
+interface SessionHandler
 {
     /**
      * @param string $name

@@ -17,15 +17,17 @@
 
 namespace Opis\Session;
 
+use Opis\Session\Containers\DefaultContainer;
+
 class Session
 {
     /** @var array */
     private $config;
 
-    /** @var ISessionHandler */
+    /** @var SessionHandler */
     private $handler;
 
-    /** @var ICookieContainer */
+    /** @var CookieContainer */
     private $container;
 
     /** @var array */
@@ -41,17 +43,17 @@ class Session
      * Session constructor.
      *
      * @param array $config
-     * @param ISessionHandler|null $handler
-     * @param ICookieContainer|null $container
+     * @param SessionHandler|null $handler
+     * @param CookieContainer|null $container
      */
-    public function __construct(array $config = [], ISessionHandler $handler = null, ICookieContainer $container = null)
+    public function __construct(array $config = [], SessionHandler $handler = null, CookieContainer $container = null)
     {
         if ($handler === null) {
             $handler = new Handlers\File(ini_get('session.save_path') ?: sys_get_temp_dir());
         }
 
         if ($container === null) {
-            $container = new CookieContainer();
+            $container = new DefaultContainer();
         }
 
         $this->handler = $handler;
@@ -379,9 +381,9 @@ class Session
     /**
      * Get the session handler object
      *
-     * @return ISessionHandler
+     * @return SessionHandler
      */
-    public function getHandler(): ISessionHandler
+    public function getHandler(): SessionHandler
     {
         return $this->handler;
     }
