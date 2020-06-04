@@ -23,7 +23,7 @@ use Opis\Session\CookieContainer;
 class RequestContainer implements CookieContainer
 {
 
-    private ?Request $request;
+    private ?Request $request = null;
 
     private array $cookies = [];
 

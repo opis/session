@@ -30,9 +30,9 @@ class Session
 
     private array $data;
 
-    private ?Flash $flash;
+    private ?Flash $flash = null;
 
-    private ?SessionData $session;
+    private ?SessionData $session = null;
 
     /**
      * Session constructor.
