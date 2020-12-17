@@ -65,7 +65,7 @@ class Session
             'cookie_path' => ini_get('session.cookie_path') ?: '/',
             'cookie_domain' => ini_get('session.cookie_domain') ?: '',
             'cookie_secure' => (bool) ini_get('session.cookie_secure'),
-            'cookie_httponly' => (bool) ini_get('session.cookie_httponly'),
+            'cookie_httponly' => (bool) (ini_get('session.cookie_httponly') ?? true),
             'cookie_samesite' => ini_get('session.cookie_samesite') ?: null,
         ];
 
